@@ -1,0 +1,203 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/client"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── USERS ─────────────────────────────────────────────
+
+enum Role {
+  STUDENT
+  STAFF
+  EQUIPMENT_MANAGER
+  ADMIN
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String
+  passwordHash  String?   // null if logging in via SSO
+  role          Role      @default(STUDENT)
+  studentId     String?   // student ID number
+  phone         String?
+  ssoProvider   String?   // "azure_ad", "cas", null
+  ssoSubject    String?   // ID from external system
+  emailVerified Boolean   @default(false)
+  active        Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  reservations  Reservation[]
+  faultReports  FaultReport[]
+
+  @@index([email])
+  @@index([ssoSubject])
+}
+
+// ─── EQUIPMENT ─────────────────────────────────────────
+
+enum EquipmentStatus {
+  AVAILABLE
+  RESERVED
+  RENTED
+  MAINTENANCE
+  DAMAGED
+  RETIRED
+}
+
+enum EquipmentCategory {
+  LAPTOP
+  PROJECTOR
+  CAMERA
+  AUDIO
+  TABLET
+  PRINTER_3D
+  ELECTRONICS
+  ACCESSORY
+  OTHER
+}
+
+model Equipment {
+  id              String            @id @default(cuid())
+  name            String
+  category        EquipmentCategory
+  serialNumber    String            @unique
+  manufacturer    String?
+  model           String?
+  description     String?
+  technicalSpec   Json?             // flexible field for technical specifications
+  locationBuilding String?
+  locationRoom    String?
+  locationDetail  String?
+  status          EquipmentStatus   @default(AVAILABLE)
+  purchaseDate    DateTime?
+  warrantyUntil   DateTime?
+  maxRentalDays   Int               @default(7)
+  imageUrl        String?
+  active          Boolean           @default(true)
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  reservations    Reservation[]
+  faultReports    FaultReport[]
+
+  @@index([status])
+  @@index([category])
+  @@index([serialNumber])
+}
+
+// ─── RESERVATIONS / RENTALS ────────────────────────────
+
+enum ReservationStatus {
+  PENDING      // submitted, awaiting confirmation
+  CONFIRMED    // confirmed by manager
+  ACTIVE       // equipment checked out
+  RETURNED     // returned
+  CANCELLED    // cancelled by user
+  OVERDUE      // return deadline exceeded
+  REJECTED     // rejected by manager
+}
+
+model Reservation {
+  id              String            @id @default(cuid())
+  userId          String
+  equipmentId     String
+  status          ReservationStatus @default(PENDING)
+  startDate       DateTime
+  endDate         DateTime
+  actualReturnDate DateTime?
+  purposeNote     String?           // rental purpose
+  managerNote     String?           // manager note
+  reminderSent    Boolean           @default(false)
+  overdueSent     Boolean           @default(false)
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  user            User              @relation(fields: [userId], references: [id])
+  equipment       Equipment         @relation(fields: [equipmentId], references: [id])
+  returnRecord    ReturnRecord?
+
+  @@index([userId])
+  @@index([equipmentId])
+  @@index([status])
+  @@index([endDate])
+}
+
+// ─── RETURNS ───────────────────────────────────────────
+
+enum EquipmentCondition {
+  PERFECT
+  GOOD
+  MINOR_DAMAGE
+  MAJOR_DAMAGE
+  BROKEN
+}
+
+model ReturnRecord {
+  id              String             @id @default(cuid())
+  reservationId   String             @unique
+  condition       EquipmentCondition
+  notes           String?
+  photosUrls      String[]           // array of return photo URLs
+  processedBy     String?            // ID of the manager processing the return
+  createdAt       DateTime           @default(now())
+
+  reservation     Reservation        @relation(fields: [reservationId], references: [id])
+}
+
+// ─── FAULT REPORTS ─────────────────────────────────────
+
+enum FaultStatus {
+  REPORTED
+  IN_REVIEW
+  IN_REPAIR
+  RESOLVED
+  CLOSED
+}
+
+model FaultReport {
+  id          String      @id @default(cuid())
+  equipmentId String
+  reportedBy  String
+  description String
+  status      FaultStatus @default(REPORTED)
+  resolution  String?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  equipment   Equipment   @relation(fields: [equipmentId], references: [id])
+  reporter    User        @relation(fields: [reportedBy], references: [id])
+}
+
+// ─── NOTIFICATIONS ─────────────────────────────────────
+
+enum NotificationType {
+  RESERVATION_CONFIRMED
+  RESERVATION_REJECTED
+  REMINDER_RETURN
+  OVERDUE_NOTICE
+  FAULT_STATUS_CHANGE
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  type      NotificationType
+  title     String
+  message   String
+  read      Boolean          @default(false)
+  sentEmail Boolean          @default(false)
+  sentSms   Boolean          @default(false)
+  createdAt DateTime         @default(now())
+
+  @@index([userId, read])
+}

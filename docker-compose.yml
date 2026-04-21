@@ -1,0 +1,32 @@
+services:
+  postgres:
+    image: postgres:18.3
+    container_name: equiprent_db
+    environment:
+      POSTGRES_USER: equiprent
+      POSTGRES_PASSWORD: equiprent_secret
+      POSTGRES_DB: equiprent
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U equiprent" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  report-service:
+    build: ./apps/report-service
+    container_name: equiprent_reports
+    environment:
+      DATABASE_URL: postgresql://equiprent:equiprent_secret@postgres:5432/equiprent
+      PORT: 3001
+    ports:
+      - "3001:3001"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  postgres_data:

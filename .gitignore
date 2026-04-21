@@ -1,0 +1,65 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/apps/web/node_modules
+/.pnp
+.pnp.js
+
+# testing
+/apps/web/coverage
+
+# next.js
+/.next/
+/out/
+
+# production
+/apps/web/build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# local env files
+.env*.local
+.env
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# Nestjs specific
+/apps/api/dist
+/apps/api/node_modules
+/apps/api/build
+/apps/api/tmp
+
+# Logs
+/apps/api/logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# dotenv environment variable files
+.env
+.env.development
+.env.test
+.env.production
+
+# temp directory
+.temp
+.tmp
+node_modules
+
+#package DB
+generated/

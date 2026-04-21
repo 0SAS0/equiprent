@@ -1,0 +1,15 @@
+{
+  "name": "equiprent",
+  "private": true,
+  "scripts": {
+    "dev:web": "pnpm --filter @equiprent/web dev",
+    "dev:api": "pnpm --filter @equiprent/api start:dev",
+    "dev": "concurrently \"pnpm dev:web\" \"pnpm dev:api\"",
+    "db:generate": "pnpm --filter @equiprent/db db:generate",
+    "db:migrate": "pnpm --filter @equiprent/db db:migrate",
+    "db:studio": "pnpm --filter @equiprent/db studio"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
