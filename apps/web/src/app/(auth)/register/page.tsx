@@ -34,10 +34,6 @@ const registerSchema = z.object({
 });
 type RegisterFormData = z.infer<typeof registerSchema>;
 
-function hasMessage(value: unknown): value is { message: string } {
-  return typeof value === "object" && value !== null && "message" in value;
-}
-
 export default function SignupForm() {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
@@ -45,24 +41,29 @@ export default function SignupForm() {
     resolver: zodResolver(registerSchema),
   });
 
-  const onSubmit = async (data: RegisterFormData) => {
+  const submit = handleSubmit(async (data: RegisterFormData) => {
     // Handle form submission, e.g., send data to the server
     setError(null);
-    const error = await signUp.email({
-      email: data.email,
-      password: data.password,
-      name: data.name,
-      callbackURL: "/dashboard",
-    });
-    if (hasMessage(error)) {
-      setError(error.message ?? "An error occurred during registration");
-      return;
+    try {
+      const result = await signUp.email({
+        email: data.email,
+        password: data.password,
+        name: data.name,
+      },
+        {
+          onError: (error) => {
+            setError(error.error.message || "An error occurred during registration");
+          }
+        }
+      );
+
+      if (result?.error) return;
+      router.replace(`/verify-email?email=${encodeURIComponent(data.email)}`);
+      router.refresh();
+    } catch {
+      setError("An unexpected error occurred. Please try again.");
     }
-    router.push("/dashboard");
-    router.refresh();
-
-
-  }
+  });
   return (
     <div className={cn("flex flex-col gap-6")}>
       <Card>
@@ -73,8 +74,10 @@ export default function SignupForm() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit(onSubmit)}>
-
+          <form method="post" noValidate onSubmit={(e) => { e.preventDefault(); void submit(e); }}>
+            {error && (
+              <p className="text-sm text-destructive text-center">{error}</p>
+            )}
             <FieldGroup>
               <Field>
                 <FieldLabel htmlFor="name">Full Name</FieldLabel>
@@ -128,7 +131,9 @@ export default function SignupForm() {
                 </FieldDescription>
               </Field>
               <Field>
-                <Button type="submit">Create Account</Button>
+                <Button type="submit" disabled={isSubmitting}>
+                  {isSubmitting ? "Creating..." : "Create Account"}
+                </Button>
                 <FieldDescription className="text-center">
                   Already have an account? <a href="/login">Sign in</a>
                 </FieldDescription>
@@ -141,7 +146,7 @@ export default function SignupForm() {
         By clicking continue, you agree to our <a href="#">Terms of Service</a>{" "}
         and <a href="#">Privacy Policy</a>.
       </FieldDescription>
-    </div>
+    </div >
   )
 }
 

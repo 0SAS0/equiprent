@@ -21,26 +21,73 @@ enum Role {
   ADMIN
 }
 
+// ─── BETTER AUTH SCHEMA ────────────────────────────────────────────
 model User {
-  id            String    @id @default(cuid())
-  email         String    @unique
-  name          String
-  passwordHash  String?   // null if logging in via SSO
-  role          Role      @default(STUDENT)
-  studentId     String?   // student ID number
+  id            String   @id @default(cuid())
+  email         String   @unique
+  name          String?
+  passwordHash  String?
+  role          Role     @default(STUDENT)
+  studentId     String?
   phone         String?
-  ssoProvider   String?   // "azure_ad", "cas", null
-  ssoSubject    String?   // ID from external system
-  emailVerified Boolean   @default(false)
-  active        Boolean   @default(true)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  ssoProvider   String?
+  ssoSubject    String?
+  emailVerified Boolean  @default(false)
+  active        Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
-  reservations  Reservation[]
-  faultReports  FaultReport[]
+  reservations Reservation[]
+  faultReports FaultReport[]
+  accounts     Account[]
+  sessions     Session[]
 
   @@index([email])
   @@index([ssoSubject])
+}
+
+model Account {
+  id                    String    @id @default(cuid())
+  accountId             String
+  providerId            String
+  userId                String
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([providerId, accountId])
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  expiresAt DateTime
+  ipAddress String?
+  userAgent String?
+  userId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Verification {
+  id         String   @id @default(cuid())
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([identifier, value])
 }
 
 // ─── EQUIPMENT ─────────────────────────────────────────
@@ -67,28 +114,28 @@ enum EquipmentCategory {
 }
 
 model Equipment {
-  id              String            @id @default(cuid())
-  name            String
-  category        EquipmentCategory
-  serialNumber    String            @unique
-  manufacturer    String?
-  model           String?
-  description     String?
-  technicalSpec   Json?             // flexible field for technical specifications
+  id               String            @id @default(cuid())
+  name             String
+  category         EquipmentCategory
+  serialNumber     String            @unique
+  manufacturer     String?
+  model            String?
+  description      String?
+  technicalSpec    Json? // flexible field for technical specifications
   locationBuilding String?
-  locationRoom    String?
-  locationDetail  String?
-  status          EquipmentStatus   @default(AVAILABLE)
-  purchaseDate    DateTime?
-  warrantyUntil   DateTime?
-  maxRentalDays   Int               @default(7)
-  imageUrl        String?
-  active          Boolean           @default(true)
-  createdAt       DateTime          @default(now())
-  updatedAt       DateTime          @updatedAt
+  locationRoom     String?
+  locationDetail   String?
+  status           EquipmentStatus   @default(AVAILABLE)
+  purchaseDate     DateTime?
+  warrantyUntil    DateTime?
+  maxRentalDays    Int               @default(7)
+  imageUrl         String?
+  active           Boolean           @default(true)
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
 
-  reservations    Reservation[]
-  faultReports    FaultReport[]
+  reservations Reservation[]
+  faultReports FaultReport[]
 
   @@index([status])
   @@index([category])
@@ -98,33 +145,33 @@ model Equipment {
 // ─── RESERVATIONS / RENTALS ────────────────────────────
 
 enum ReservationStatus {
-  PENDING      // submitted, awaiting confirmation
-  CONFIRMED    // confirmed by manager
-  ACTIVE       // equipment checked out
-  RETURNED     // returned
-  CANCELLED    // cancelled by user
-  OVERDUE      // return deadline exceeded
-  REJECTED     // rejected by manager
+  PENDING // submitted, awaiting confirmation
+  CONFIRMED // confirmed by manager
+  ACTIVE // equipment checked out
+  RETURNED // returned
+  CANCELLED // cancelled by user
+  OVERDUE // return deadline exceeded
+  REJECTED // rejected by manager
 }
 
 model Reservation {
-  id              String            @id @default(cuid())
-  userId          String
-  equipmentId     String
-  status          ReservationStatus @default(PENDING)
-  startDate       DateTime
-  endDate         DateTime
+  id               String            @id @default(cuid())
+  userId           String
+  equipmentId      String
+  status           ReservationStatus @default(PENDING)
+  startDate        DateTime
+  endDate          DateTime
   actualReturnDate DateTime?
-  purposeNote     String?           // rental purpose
-  managerNote     String?           // manager note
-  reminderSent    Boolean           @default(false)
-  overdueSent     Boolean           @default(false)
-  createdAt       DateTime          @default(now())
-  updatedAt       DateTime          @updatedAt
+  purposeNote      String? // rental purpose
+  managerNote      String? // manager note
+  reminderSent     Boolean           @default(false)
+  overdueSent      Boolean           @default(false)
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
 
-  user            User              @relation(fields: [userId], references: [id])
-  equipment       Equipment         @relation(fields: [equipmentId], references: [id])
-  returnRecord    ReturnRecord?
+  user         User          @relation(fields: [userId], references: [id])
+  equipment    Equipment     @relation(fields: [equipmentId], references: [id])
+  returnRecord ReturnRecord?
 
   @@index([userId])
   @@index([equipmentId])
@@ -143,15 +190,15 @@ enum EquipmentCondition {
 }
 
 model ReturnRecord {
-  id              String             @id @default(cuid())
-  reservationId   String             @unique
-  condition       EquipmentCondition
-  notes           String?
-  photosUrls      String[]           // array of return photo URLs
-  processedBy     String?            // ID of the manager processing the return
-  createdAt       DateTime           @default(now())
+  id            String             @id @default(cuid())
+  reservationId String             @unique
+  condition     EquipmentCondition
+  notes         String?
+  photosUrls    String[] // array of return photo URLs
+  processedBy   String? // ID of the manager processing the return
+  createdAt     DateTime           @default(now())
 
-  reservation     Reservation        @relation(fields: [reservationId], references: [id])
+  reservation Reservation @relation(fields: [reservationId], references: [id])
 }
 
 // ─── FAULT REPORTS ─────────────────────────────────────
@@ -174,8 +221,8 @@ model FaultReport {
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
 
-  equipment   Equipment   @relation(fields: [equipmentId], references: [id])
-  reporter    User        @relation(fields: [reportedBy], references: [id])
+  equipment Equipment @relation(fields: [equipmentId], references: [id])
+  reporter  User      @relation(fields: [reportedBy], references: [id])
 }
 
 // ─── NOTIFICATIONS ─────────────────────────────────────

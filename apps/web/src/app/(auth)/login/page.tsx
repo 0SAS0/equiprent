@@ -17,10 +17,45 @@ import {
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { Globe } from "lucide-react"
+import { useRouter } from "next/navigation";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { useState } from "react"
+import { z } from "zod/v3";
+import { signIn } from "@/lib/auth-client"
+
+const loginSchema = z.object({
+  email: z.string().email("Invalid email address"),
+  password: z.string().min(8, "Password must be at least 8 characters long"),
+});
+type LoginFormData = z.infer<typeof loginSchema>;
 
 
 export default function LoginForm() {
+  const router = useRouter();
+  const [error, setError] = useState<string | null>(null);
+  const { register, handleSubmit, formState: { errors } } = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+  });
 
+  const onSubmit = async (data: LoginFormData) => {
+    setError(null);
+
+    await signIn.email({
+      email: data.email,
+      password: data.password,
+    },
+      {
+        onSuccess: () => {
+          router.push("/dashboard");
+          router.refresh();
+        },
+        onError: (error) => {
+          setError(error.error.message ?? "An error occurred during login");
+        },
+      }
+    );
+  }
   return (
     <div className={cn("flex flex-col gap-6")} >
       <Card>
@@ -31,7 +66,10 @@ export default function LoginForm() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form>
+          <form onSubmit={handleSubmit(onSubmit)}>
+            {error && (
+              <p className="text-sm text-destructive text-center mb-2">{error}</p>
+            )}
             <FieldGroup>
               <Field>
                 <Button variant="outline" type="button">
@@ -45,11 +83,17 @@ export default function LoginForm() {
               <Field>
                 <FieldLabel htmlFor="email">Email</FieldLabel>
                 <Input
+                  {...register("email")}
                   id="email"
                   type="email"
                   placeholder="email@example.com"
                   required
                 />
+                {errors.email && (
+                  <p className="text-sm text-destructive">
+                    {errors.email.message}
+                  </p>
+                )}
               </Field>
               <Field>
                 <div className="flex items-center">
@@ -61,7 +105,12 @@ export default function LoginForm() {
                     Forgot your password?
                   </a>
                 </div>
-                <Input id="password" type="password" required />
+                <Input {...register("password")} id="password" type="password" required />
+                {errors.password && (
+                  <p className="text-sm text-destructive">
+                    {errors.password.message}
+                  </p>
+                )}
               </Field>
               <Field>
                 <Button type="submit">Login</Button>
