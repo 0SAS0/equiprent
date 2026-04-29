@@ -52,7 +52,7 @@ const data = {
       ),
     },
     {
-      title: "Raports",
+      title: "Reports",
       url: "#",
       icon: (
         <ChartLine />
@@ -163,7 +163,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               className="data-[slot=sidebar-menu-button]:p-1.5!"
             >
               <a href="#">
-                <Blocks className="size-!5" />
+                <Blocks className="size-5" />
                 <span className="text-base font-semibold">EquipRent</span>
               </a>
             </SidebarMenuButton>
