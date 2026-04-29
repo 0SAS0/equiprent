@@ -21,9 +21,8 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar"
 import { authClient, useSession } from "@/lib/auth-client"
-import { EllipsisVerticalIcon, CircleUserRoundIcon, CreditCardIcon, BellIcon, LogOutIcon } from "lucide-react"
+import { BellIcon, CircleUserRoundIcon, CreditCardIcon, EllipsisVerticalIcon, LogOutIcon } from "lucide-react"
 import { useRouter } from "next/navigation"
-import { Button } from "../ui/button"
 
 
 export function NavUser({
@@ -109,12 +108,9 @@ export function NavUser({
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <Button onClick={signOut} className="bg-transparent text-white px-0">
-                <LogOutIcon
-                />
-                Log out
-              </Button>
+            <DropdownMenuItem onClick={signOut}>
+              <LogOutIcon />
+              Log out
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

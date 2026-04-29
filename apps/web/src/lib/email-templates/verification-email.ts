@@ -23,7 +23,7 @@ export function buildVerificationEmail({ name, verificationUrl }: VerificationEm
     "",
     "Welcome to EquipRent.",
     "Please verify your email address by opening the link below:",
-    safeUrl,
+    verificationUrl,
     "",
     "If you did not create this account, you can ignore this email.",
   ].join("\n");
