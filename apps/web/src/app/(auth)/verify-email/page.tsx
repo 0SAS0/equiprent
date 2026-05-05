@@ -14,8 +14,8 @@ import {
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { Mail } from "lucide-react";
-import { Button } from "@/components/ui/button"
 import { redirect } from "next/navigation";
+import { ResendVerificationButton } from "./resend-button";
 
 type VerifyEmailPageProps = {
   searchParams?: Promise<{ email?: string }>;
@@ -65,9 +65,7 @@ export default async function VerifyEmailPage({ searchParams }: VerifyEmailPageP
             </Field>
           </FieldGroup>
           <div className="flex items-center justify-center mt-4">
-            <Button variant="outline" className="flex-1" type="button">
-              Send another verification email
-            </Button>
+            <ResendVerificationButton email={emailToShow} />
           </div>
         </CardContent>
       </Card>
