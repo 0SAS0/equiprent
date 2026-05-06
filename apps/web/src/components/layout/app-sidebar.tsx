@@ -13,7 +13,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
-import { LayoutDashboardIcon, UsersIcon, CameraIcon, FileTextIcon, Settings2Icon, CircleHelpIcon, SearchIcon, Blocks, Clock3, CornerDownLeft, ChartLine, Box } from "lucide-react"
+import { LayoutDashboardIcon, UsersIcon, Blocks, Clock3, CornerDownLeft, ChartLine, Box } from "lucide-react"
 
 const data = {
   user: {
@@ -24,7 +24,7 @@ const data = {
   navMain: [
     {
       title: "Dashboard",
-      url: "#",
+      url: "/dashboard",
       icon: (
         <LayoutDashboardIcon
         />
@@ -32,120 +32,37 @@ const data = {
     },
     {
       title: "Equipment",
-      url: "#",
+      url: "/equipment",
       icon: (
         <Box />
       ),
     },
     {
       title: "Reservations",
-      url: "#",
+      url: "/reservations",
       icon: (
         <Clock3 />
       ),
     },
     {
       title: "Returns",
-      url: "#",
+      url: "/returns",
       icon: (
         <CornerDownLeft />
       ),
     },
     {
       title: "Reports",
-      url: "#",
+      url: "/reports",
       icon: (
         <ChartLine />
       ),
     },
     {
       title: "Users",
-      url: "#",
+      url: "/users",
       icon: (
         <UsersIcon
-        />
-      ),
-    },
-  ],
-  navClouds: [
-    {
-      title: "Capture",
-      icon: (
-        <CameraIcon
-        />
-      ),
-      isActive: true,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Proposal",
-      icon: (
-        <FileTextIcon
-        />
-      ),
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Prompts",
-      icon: (
-        <FileTextIcon
-        />
-      ),
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
-    },
-  ],
-  navSecondary: [
-    {
-      title: "Settings",
-      url: "#",
-      icon: (
-        <Settings2Icon
-        />
-      ),
-    },
-    {
-      title: "Get Help",
-      url: "#",
-      icon: (
-        <CircleHelpIcon
-        />
-      ),
-    },
-    {
-      title: "Search",
-      url: "#",
-      icon: (
-        <SearchIcon
         />
       ),
     },
@@ -158,13 +75,17 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton
-              asChild
-              className="data-[slot=sidebar-menu-button]:p-1.5!"
-            >
-              <a href="#">
-                <Blocks className="size-5" />
-                <span className="text-base font-semibold">EquipRent</span>
+            <SidebarMenuButton asChild className="data-[slot=sidebar-menu-button]:p-1.5!">
+              <a href="/dashboard" className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center shrink-0">
+                  <Blocks className="size-4 text-white" />
+                </div>
+                <div className="flex flex-col leading-tight">
+                  <span className="text-sm font-semibold">EquipRent</span>
+                  <span className="text-[9px] text-muted-foreground uppercase tracking-widest">
+                    Technical University
+                  </span>
+                </div>
               </a>
             </SidebarMenuButton>
           </SidebarMenuItem>
@@ -174,7 +95,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavMain items={data.navMain} />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        <NavUser />
       </SidebarFooter>
     </Sidebar>
   )

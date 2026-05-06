@@ -7,8 +7,9 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
-import { CirclePlusIcon } from "lucide-react"
 import { Separator } from "../ui/separator"
+import { usePathname } from "next/navigation"
+import Link from "next/link"
 
 export function NavMain({
   items,
@@ -19,33 +20,28 @@ export function NavMain({
     icon?: React.ReactNode
   }[]
 }) {
+  const pathname = usePathname()
   return (
     <SidebarGroup>
       <SidebarGroupContent className="flex flex-col gap-4">
+        <Separator className="mx-2" />
+        <span className="ml-2 text-[12px] text-muted-foreground uppercase tracking-widest font-semibold">Main</span>
         <SidebarMenu>
-          <SidebarMenuItem className="flex items-center gap-2">
-            <SidebarMenuButton
-              tooltip="Quick Create"
-              className="min-w-8 bg-primary text-primary-foreground duration-200 ease-linear hover:bg-primary/90 hover:text-primary-foreground active:bg-primary/90 active:text-primary-foreground"
-            >
-              <CirclePlusIcon
-              />
-              <span>Quick Create</span>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
-        <Separator className="mx-2 my-1" />
-        <SidebarMenu>
-          {items.map((item) => (
-            <SidebarMenuItem key={item.title}>
-              <SidebarMenuButton tooltip={item.title}>
-                {item.icon}
-                <span>{item.title}</span>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          ))}
+          {items.map((item) => {
+            const isActive = pathname === item.url || (item.url !== "/dashboard" && pathname.startsWith(item.url))
+            return (
+              <SidebarMenuItem key={item.title} >
+                <SidebarMenuButton asChild isActive={isActive} tooltip={item.title} size="lg">
+                  <Link href={item.url} className="flex items-center gap-3">
+                    <span>{item.icon}</span>
+                    <span>{item.title}</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            )
+          })}
         </SidebarMenu>
       </SidebarGroupContent>
-    </SidebarGroup>
+    </SidebarGroup >
   )
 }

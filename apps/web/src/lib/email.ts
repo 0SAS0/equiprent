@@ -11,7 +11,7 @@ export async function sendEmail(to: string, verificationUrl: string, name?: stri
   const template = buildVerificationEmail({ name, verificationUrl });
 
   const { error } = await resend.emails.send({
-    from: "EquipRent <onboarding@resend.dev>",
+    from: "EquipRent <onboarding@equiprent.me>",
     to: [to],
     subject: template.subject,
     html: template.html,
