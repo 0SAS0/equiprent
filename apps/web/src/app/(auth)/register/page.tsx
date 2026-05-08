@@ -8,7 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { z } from "zod/v3";
+import { z } from "zod/v4";
 import {
   Field,
   FieldDescription,
@@ -18,7 +18,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { signUp } from "@/lib/auth-client";
+import { authClient } from "@/lib/auth-client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -40,34 +40,32 @@ export default function SignupForm() {
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
   });
-  const submit = handleSubmit(async (data: RegisterFormData) => {
+  const onSubmit = async (data: RegisterFormData) => {
     setError(null);
-    try {
-      await signUp.email({
-        email: data.email,
+    const email = data.email.trim().toLowerCase();
+
+    await authClient.signUp.email(
+      {
+        email,
         password: data.password,
         name: data.name,
       },
-        {
-          onSuccess: () => {
-            router.replace(`/verify-email?email=${encodeURIComponent(data.email)}`);
-            router.refresh();
-          },
-          onError: (ctx) => {
-            console.log("Error details:", ctx.error); // Debugowanie
-            if (ctx.error.status === 422 || ctx.error.message?.includes("already in use")) {
-              setError("An account with this email already exists. If you haven't verified your email yet, please check your inbox or request a new verification link.")
-            } else {
-              setError(ctx.error.message || "An error occurred during registration")
-            }
+      {
+        onSuccess: () => {
+          router.push(`/verify-email?email=${encodeURIComponent(data.email)}`);
+        },
+        onError: (ctx) => {
+          if (ctx.error.status === 409 || ctx.error.status === 422 || ctx.error.message?.toLowerCase().includes("already")) {
+            setError(
+              "An account with this email already exists. If you haven't verified your email yet, check your inbox or request a new verification link.",
+            );
+            return;
           }
-        }
-      );
-    } catch (err) {
-      console.log("Catch error:", err);
-      setError("An unexpected error occurred. Please try again.");
-    }
-  });
+          setError(ctx.error.message || "An error occurred during registration");
+        },
+      },
+    );
+  };
   return (
     <div className={cn("flex flex-col gap-6")}>
       <Card>
@@ -78,7 +76,7 @@ export default function SignupForm() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form method="post" noValidate onSubmit={(e) => { e.preventDefault(); void submit(e); }}>
+          <form method="post" noValidate onSubmit={handleSubmit(onSubmit)}>
             {error && (
               <p className="text-sm text-destructive text-center">{error}</p>
             )}

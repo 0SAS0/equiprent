@@ -6,9 +6,11 @@ import { Input } from "@/components/ui/input";
 import { authClient } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod/v4";
+import { AlertCircle } from "lucide-react";
 
 const forgotPasswordSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -17,16 +19,18 @@ type ForgotPasswordFormData = z.infer<typeof forgotPasswordSchema>;
 
 export default function ForgotPassword() {
   const [error, setError] = useState<string | null>(null);
-  const handleSubmit = useForm<ForgotPasswordFormData>({
+  const { handleSubmit, register, formState: { errors } } = useForm<ForgotPasswordFormData>({
     resolver: zodResolver(forgotPasswordSchema),
   });
   const onSubmit = async (data: ForgotPasswordFormData) => {
-    try {
-      authClient.requestPasswordReset({ email: data.email, redirectTo: `/reset-password` });
-    } catch (error) {
-      console.error("Error requesting password reset:", error);
+
+    const { data: resetData } = await authClient.requestPasswordReset({ email: data.email, redirectTo: `/reset-password` });
+
+    console.log(resetData)
+    if (resetData?.message) {
+      setError(resetData.message);
     }
-  }
+  };
   return (
     <div className={cn("flex flex-col gap-6")} >
       <Card>
@@ -38,19 +42,26 @@ export default function ForgotPassword() {
           <FieldSeparator className="my-1 mb-0" />
         </CardHeader>
         <CardContent>
-          <form>
-            {error && (
-              <p className="text-sm text-destructive text-center mb-2">{error}</p>
-            )}
+          {error && (
+            <Alert variant="default" className="mb-4 p-2">
+              <AlertCircle className="h-4 w-4 " />
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+          <form onSubmit={handleSubmit(onSubmit)}>
             <FieldGroup>
               <Field>
                 <FieldLabel htmlFor="email">Email</FieldLabel>
                 <Input
-
+                  {...register("email")}
                   id="email"
                   type="email"
                   placeholder="email@example.com"
+                  required
                 />
+                {errors.email && (
+                  <p className="text-sm text-destructive">{errors.email.message}</p>
+                )}
               </Field>
               <Field>
                 <Button type="submit" className="w-full">
