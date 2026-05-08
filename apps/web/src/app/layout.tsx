@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { DM_Mono, DM_Sans } from "next/font/google";
 import "./globals.css";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { Toaster } from "@/components/ui/sonner";
 
 const dmSans = DM_Sans({
   subsets: ["latin"],
@@ -30,6 +31,7 @@ export default function RootLayout({
       className={`${dmSans.variable} ${dmMono.variable} h-full antialiased dark`}
     >
       <body className="min-h-full flex flex-col">
+        <Toaster />
         <TooltipProvider>{children}</TooltipProvider>
       </body>
     </html>

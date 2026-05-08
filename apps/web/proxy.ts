@@ -12,7 +12,6 @@ export async function proxy(request: NextRequest) {
   const isLogin = pathname === "/login";
   const isRegister = pathname === "/register";
   const isVerify = pathname === "/verify-email";
-  const isAuthPage = isLogin || isRegister || isVerify;
 
   // Not logged in -> protect dashboard + verify page
   if (!session && (isDashboard || isVerify)) {
@@ -20,24 +19,21 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL(`/login?next=${next}`, request.url))
   }
 
-  // Logged in but not verified -> force verify before dashboard
-  if (session && !session.user.emailVerified && isDashboard) {
-    return NextResponse.redirect(new URL("/verify-email", request.url))
-  }
+  // Logged in -> block auth pages (login/register)
+  if (session) {
+    if (isLogin || isRegister) {
+      return NextResponse.redirect(new URL("/dashboard", request.url))
+    }
 
-  // Logged in + verified -> block auth pages
-  if (session && session.user.emailVerified && isAuthPage) {
-    return NextResponse.redirect(new URL("/dashboard", request.url))
-  }
-
-  // Logged in + not verified -> block login/register
-  if (session && !session.user.emailVerified && (isLogin || isRegister)) {
-    return NextResponse.redirect(new URL("/verify-email", request.url))
+    // If not verified and tries to access dashboard -> force verify
+    if (!session.user.emailVerified && isDashboard) {
+      return NextResponse.redirect(new URL("/verify-email", request.url))
+    }
   }
 
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/login", "/register", "/verify-email"], // Specify the routes the middleware applies to
+  matcher: ["/dashboard/:path*", "/login", "/register", "/verify-email"],
 };

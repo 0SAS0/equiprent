@@ -40,27 +40,31 @@ export default function SignupForm() {
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
   });
-
   const submit = handleSubmit(async (data: RegisterFormData) => {
-    // Handle form submission, e.g., send data to the server
     setError(null);
     try {
-      const result = await signUp.email({
+      await signUp.email({
         email: data.email,
         password: data.password,
         name: data.name,
       },
         {
-          onError: (error) => {
-            setError(error.error.message || "An error occurred during registration");
+          onSuccess: () => {
+            router.replace(`/verify-email?email=${encodeURIComponent(data.email)}`);
+            router.refresh();
+          },
+          onError: (ctx) => {
+            console.log("Error details:", ctx.error); // Debugowanie
+            if (ctx.error.status === 422 || ctx.error.message?.includes("already in use")) {
+              setError("An account with this email already exists. If you haven't verified your email yet, please check your inbox or request a new verification link.")
+            } else {
+              setError(ctx.error.message || "An error occurred during registration")
+            }
           }
         }
       );
-
-      if (result?.error) return;
-      router.replace(`/verify-email?email=${encodeURIComponent(data.email)}`);
-      router.refresh();
-    } catch {
+    } catch (err) {
+      console.log("Catch error:", err);
       setError("An unexpected error occurred. Please try again.");
     }
   });

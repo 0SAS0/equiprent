@@ -6,7 +6,8 @@ const nextConfig: NextConfig = {
   reactCompiler: true,
   turbopack: {
     root: path.resolve(__dirname, "..//.."),
-  }
+  },
+  allowedDevOrigins: ['equiprent.me'],
 };
 
 export default nextConfig;

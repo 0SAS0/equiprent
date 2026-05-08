@@ -21,7 +21,7 @@ import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { useState } from "react"
-import { z } from "zod/v3";
+import { z } from "zod/v4";
 import { signIn } from "@/lib/auth-client"
 
 const loginSchema = z.object({
@@ -99,7 +99,7 @@ export default function LoginForm() {
                 <div className="flex items-center">
                   <FieldLabel htmlFor="password">Password</FieldLabel>
                   <a
-                    href="#"
+                    href="/forgot-password"
                     className="ml-auto text-sm underline-offset-4 hover:underline"
                   >
                     Forgot your password?

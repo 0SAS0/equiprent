@@ -1,7 +1,7 @@
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { prisma } from "@equiprent/db";
-import { sendEmail } from "@/lib/email";
+import { sendEmail, sendResetPasswordEmail } from "@/lib/email";
 
 export const auth = betterAuth({
   database: prismaAdapter(prisma, {
@@ -10,11 +10,10 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
     minPasswordLength: 8,
-    onExistingUserSignUp: async ({ user: _user }, _request) => {
-      // You can choose to throw an error or allow sign-in for existing users
-      throw new Error("Unable to create account: email already in use");
-    },
     requireEmailVerification: true,
+    sendResetPassword: async ({ user, url }) => {
+      await sendResetPasswordEmail(user.email, url)
+    },
   },
   emailVerification: {
     sendVerificationEmail: async ({ user, url }) => {
