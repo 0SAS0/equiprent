@@ -6,5 +6,5 @@ import { EquipmentStatus } from '@equiprent/db';
 export class UpdateEquipmentDto extends PartialType(CreateEquipmentDto) {
   @IsEnum(EquipmentStatus)
   @IsOptional()
-  status: EquipmentStatus;
+  status!: EquipmentStatus;
 }

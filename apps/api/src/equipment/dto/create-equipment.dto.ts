@@ -3,34 +3,34 @@ import { IsInt, IsString, IsEnum, IsOptional } from 'class-validator';
 
 export class CreateEquipmentDto {
   @IsString()
-  name: string;
+  name!: string;
 
   @IsEnum(EquipmentCategory)
-  category: string;
+  category!: string;
 
   @IsString()
-  serialNumber: string;
-
-  @IsString()
-  @IsOptional()
-  manufacturer: string;
+  serialNumber!: string;
 
   @IsString()
   @IsOptional()
-  model: string;
+  manufacturer!: string;
 
   @IsString()
   @IsOptional()
-  description: string;
+  model!: string;
 
   @IsString()
   @IsOptional()
-  locationBuilding: string;
+  description!: string;
 
   @IsString()
   @IsOptional()
-  locationRoom: string;
+  locationBuilding!: string;
+
+  @IsString()
+  @IsOptional()
+  locationRoom!: string;
 
   @IsInt()
-  maxRentalDays: number;
+  maxRentalDays!: number;
 }
