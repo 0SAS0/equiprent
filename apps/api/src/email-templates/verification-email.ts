@@ -5,28 +5,31 @@ type VerificationEmailParams = {
 
 function escapeHtml(value: string) {
   return value
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#39;");
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;');
 }
 
-export function buildVerificationEmail({ name, verificationUrl }: VerificationEmailParams) {
-  const safeName = escapeHtml((name || "there").split(" ")[0]);
+export function buildVerificationEmail({
+  name,
+  verificationUrl,
+}: VerificationEmailParams) {
+  const safeName = escapeHtml((name || 'there').split(' ')[0]);
   const safeUrl = escapeHtml(verificationUrl);
 
-  const subject = "Verify your EquipRent account";
+  const subject = 'Verify your EquipRent account';
 
   const text = [
     `Hi ${safeName},`,
-    "",
-    "Welcome to EquipRent.",
-    "Please verify your email address by opening the link below:",
+    '',
+    'Welcome to EquipRent.',
+    'Please verify your email address by opening the link below:',
     verificationUrl,
-    "",
-    "If you did not create this account, you can ignore this email.",
-  ].join("\n");
+    '',
+    'If you did not create this account, you can ignore this email.',
+  ].join('\n');
 
   const html = `<!doctype html>
 <html lang="en">

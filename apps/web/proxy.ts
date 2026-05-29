@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import { type NextRequest, NextResponse } from "next/server";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
@@ -58,11 +59,13 @@ export async function proxy(request: NextRequest) {
 	const isVerify = pathname === "/verify-email";
 
 	// Not logged in -> protect dashboard + verify page
-	if (!session && (isDashboard || isVerify)) {
+	if (!session && isDashboard) {
 		const next = encodeURIComponent(`${pathname}${search}`);
 		return NextResponse.redirect(new URL(`/login?next=${next}`, request.url));
 	}
-
+	if (!session && !isVerify) {
+		redirect("/login");
+	}
 	// Logged in -> block auth pages (login/register)
 	if (session) {
 		if (isLogin || isRegister) {

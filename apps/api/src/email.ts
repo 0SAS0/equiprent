@@ -19,12 +19,14 @@ export async function sendVerificationEmail(
   verificationUrl: string,
   name?: string | null,
 ) {
+  console.log(`[email] Sending verification email to ${to}`);
+
   const template = buildVerificationEmail({
     name: name ?? undefined,
     verificationUrl,
   });
 
-  const { error } = await getResend().emails.send({
+  const { data, error } = await getResend().emails.send({
     from,
     to,
     subject: template.subject,
@@ -33,8 +35,11 @@ export async function sendVerificationEmail(
   });
 
   if (error) {
+    console.error('[email] Verification email failed', error);
     throw new Error(`Failed to send verification email: ${error.message}`);
   }
+
+  console.log(`[email] Verification email sent: ${data?.id ?? 'unknown id'}`);
 }
 
 export async function sendResetPasswordEmail(
@@ -42,12 +47,14 @@ export async function sendResetPasswordEmail(
   resetUrl: string,
   name?: string | null,
 ) {
+  console.log(`[email] Sending reset password email to ${to}`);
+
   const template = buildPasswordResetEmail({
     name: name ?? undefined,
     resetUrl,
   });
 
-  const { error } = await getResend().emails.send({
+  const { data, error } = await getResend().emails.send({
     from,
     to,
     subject: template.subject,
@@ -56,6 +63,9 @@ export async function sendResetPasswordEmail(
   });
 
   if (error) {
+    console.error('[email] Reset password email failed', error);
     throw new Error(`Failed to send reset password email: ${error.message}`);
   }
+
+  console.log(`[email] Reset password email sent: ${data?.id ?? 'unknown id'}`);
 }

@@ -9,7 +9,7 @@ const auth = betterAuth({
   }),
   emailAndPassword: {
     enabled: true,
-    autoSignIn: true,
+    autoSignIn: false,
     minPasswordLength: 8,
     requireEmailVerification: true,
     sendResetPassword: async ({ user, url }) => {

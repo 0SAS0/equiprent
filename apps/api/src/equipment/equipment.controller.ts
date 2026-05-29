@@ -13,6 +13,8 @@ import { AuthGuard, Session } from '@thallesp/nestjs-better-auth';
 import type { UserSession } from '@thallesp/nestjs-better-auth';
 import { EquipmentService } from './equipment.service';
 import { Equipment } from '@equiprent/db';
+import { CreateEquipmentDto } from './dto/create-equipment.dto';
+import { UpdateEquipmentDto } from './dto/update-equipment.dto';
 
 @Controller('equipment')
 @UseGuards(AuthGuard)
@@ -44,14 +46,17 @@ export class EquipmentController {
 
   @Post()
   create(
-    @Body() dto: any,
+    @Body() dto: CreateEquipmentDto,
     @Session() session: UserSession,
   ): Promise<Equipment> {
     return this.equipmentService.create(dto, session.user.id);
   }
 
   @Patch('/:id')
-  update(@Param('id') id: string, @Body() dto: any): Promise<Equipment> {
+  update(
+    @Param('id') id: string,
+    @Body() dto: UpdateEquipmentDto,
+  ): Promise<Equipment> {
     return this.equipmentService.update(id, dto);
   }
 

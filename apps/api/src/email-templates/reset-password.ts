@@ -5,29 +5,32 @@ type PasswordResetEmailParams = {
 
 function escapeHtml(value: string) {
   return value
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#39;");
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;');
 }
 
-export function buildPasswordResetEmail({ name, resetUrl }: PasswordResetEmailParams) {
-  const safeName = escapeHtml((name || "there").split(" ")[0]);
+export function buildPasswordResetEmail({
+  name,
+  resetUrl,
+}: PasswordResetEmailParams) {
+  const safeName = escapeHtml((name || 'there').split(' ')[0]);
   const safeUrl = escapeHtml(resetUrl);
 
-  const subject = "Reset your EquipRent password";
+  const subject = 'Reset your EquipRent password';
 
   const text = [
     `Hi ${safeName},`,
-    "",
-    "We received a request to reset your EquipRent password.",
-    "Please reset your password by opening the link below:",
+    '',
+    'We received a request to reset your EquipRent password.',
+    'Please reset your password by opening the link below:',
     resetUrl,
-    "",
-    "This link will expire in 1 hour.",
-    "If you did not request this, you can ignore this email.",
-  ].join("\n");
+    '',
+    'This link will expire in 1 hour.',
+    'If you did not request this, you can ignore this email.',
+  ].join('\n');
 
   const html = `<!doctype html>
 <html lang="en">
