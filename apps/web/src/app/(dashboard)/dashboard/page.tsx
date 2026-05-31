@@ -1,26 +1,44 @@
-import { ChartAreaInteractive } from "@/components/chart-area-interactive"
-import { DataTable } from "@/components/data-table"
-import { SectionCards } from "@/components/section-cards"
-import data from "./data.json"
-import { Suspense } from "react"
-import { DashboardAlerts } from "@/components/dashboard-alerts"
+import { cookies } from "next/headers";
+import { StatsCards } from "@/components/dashboard/stats-cards";
+import { apiFetch } from "@/lib/api";
 
-export default function Page() {
+export default async function Page() {
+	interface Stats {
+		equipment: {
+			total: number;
+			available: number;
+			rented: number;
+			reserved: number;
+		};
+		reservations: { pending: number; active: number };
+	}
+	interface Reservation {
+		id: string;
+		equipmentId: string;
+		userId: string;
+		status: string;
+		startDate: string;
+		endDate: string;
+		equipment: { name: string };
+		user: { name: string; email: string };
+	}
+	const cookieStore = await cookies();
+	const cookieHeader = cookieStore.toString();
 
-  return (
-    <div className="flex flex-1 flex-col">
-      <Suspense fallback={null}>
-        <DashboardAlerts />
-      </Suspense>
-      <div className="@container/main flex flex-1 flex-col gap-2">
-        <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
-          <SectionCards />
-          <div className="px-4 lg:px-6">
-            <ChartAreaInteractive />
-          </div>
-          <DataTable data={data} />
-        </div>
-      </div>
-    </div>
-  )
+	const [stats, reservations] = await Promise.all([
+		apiFetch<Stats>("/equipment/stats", { headers: { cookie: cookieHeader } }),
+		apiFetch<Reservation[]>("/reservations?limit=5", {
+			headers: { cookie: cookieHeader },
+		}),
+	]);
+	return (
+		<div className="flex flex-col gap-6 py-4 md:py-6">
+			<StatsCards
+				equipment={stats.equipment}
+				reservations={stats.reservations}
+			/>
+			{/* wykres */}
+			{/* tabela ostatnich rezerwacji */}
+		</div>
+	);
 }

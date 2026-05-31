@@ -117,17 +117,18 @@ export class EquipmentService {
     });
   }
   async getStats() {
-    const [total, available, rented, reserved] = await Promise.all([
-      this.prisma.client.equipment.count(),
-      this.prisma.client.equipment.count({ where: { status: 'AVAILABLE' } }),
-      this.prisma.client.equipment.count({ where: { status: 'RENTED' } }),
-      this.prisma.client.equipment.count({ where: { status: 'RESERVED' } }),
-    ]);
+    const [total, available, rented, reserved, pending, activeReservations] =
+      await Promise.all([
+        this.prisma.client.equipment.count(),
+        this.prisma.client.equipment.count({ where: { status: 'AVAILABLE' } }),
+        this.prisma.client.equipment.count({ where: { status: 'RENTED' } }),
+        this.prisma.client.equipment.count({ where: { status: 'RESERVED' } }),
+        this.prisma.client.reservation.count({ where: { status: 'PENDING' } }),
+        this.prisma.client.reservation.count({ where: { status: 'ACTIVE' } }),
+      ]);
     return {
-      total,
-      available,
-      rented,
-      reserved,
+      equipment: { total, available, rented, reserved },
+      reservations: { pending, active: activeReservations },
     };
   }
 }

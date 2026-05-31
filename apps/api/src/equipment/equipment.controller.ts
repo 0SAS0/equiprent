@@ -34,7 +34,7 @@ export class EquipmentController {
     });
   }
 
-  @Get('stats')
+  @Get('/stats')
   getStats() {
     return this.equipmentService.getStats();
   }
