@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  ForbiddenException,
   Get,
   Param,
   Patch,
@@ -13,6 +14,7 @@ import type { UserSession } from '@thallesp/nestjs-better-auth';
 import { ReservationService } from './reservations.service';
 import { CreateReservationDto } from './dto/create-reservation.dto';
 import { Role } from '@equiprent/db';
+import type auth from '../auth';
 
 @Controller('reservations')
 @UseGuards(AuthGuard)
@@ -25,7 +27,7 @@ export class ReservationController {
   }
 
   @Get()
-  findAll(@Session() session: UserSession) {
+  findAll(@Session() session: UserSession<typeof auth>) {
     const role = session.user.role;
     if (
       role !== Role.STUDENT &&
@@ -50,7 +52,15 @@ export class ReservationController {
   }
 
   @Patch(':id/confirm')
-  confirm(@Param('id') id: string) {
+  confirm(@Param('id') id: string, @Session() session: UserSession) {
+    const role = Array.isArray(session.user.role)
+      ? session.user.role[0]
+      : session.user.role;
+
+    if (role !== Role.ADMIN && role !== Role.EQUIPMENT_MANAGER) {
+      throw new ForbiddenException('Only managers can confirm reservations');
+    }
+
     return this.reservationService.confirm(id);
   }
 }

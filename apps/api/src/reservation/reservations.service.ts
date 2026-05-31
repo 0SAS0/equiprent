@@ -57,6 +57,8 @@ export class ReservationService {
       const reservation = await tx.reservation.create({
         data: {
           ...dto,
+          startDate: new Date(dto.startDate), // ← konwersja
+          endDate: new Date(dto.endDate), // ← konwersja
           userId,
           status: 'PENDING',
         },
