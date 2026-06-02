@@ -22,7 +22,7 @@ export function StatsCards({ equipment, reservations }: StatsCardsProps) {
 	const cards = [
 		{
 			title: "Total Equipment",
-			value: equipment.total, // ← destrukturyzowane propsy
+			value: equipment.total,
 			description: "All registered equipment",
 			icon: <BoxIcon className="size-4 text-muted-foreground" />,
 		},

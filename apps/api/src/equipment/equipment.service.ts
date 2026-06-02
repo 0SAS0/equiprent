@@ -116,19 +116,110 @@ export class EquipmentService {
       data: { active: false },
     });
   }
+  async buildMonthlyReservationCounts(reservations: { createdAt: Date }[]) {
+    const months: { month: string; count: number }[] = [];
+
+    const now = new Date();
+
+    for (let i = 6; i >= 0; i--) {
+      const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+
+      months.push({
+        month: date.toLocaleString('en-US', { month: 'short' }),
+        count: 0,
+      });
+    }
+
+    for (const reservation of reservations) {
+      const month = reservation.createdAt.toLocaleString('en-US', {
+        month: 'short',
+      });
+
+      const found = months.find((item) => item.month === month);
+
+      if (found) {
+        found.count += 1;
+      }
+    }
+
+    return months;
+  }
+
   async getStats() {
-    const [total, available, rented, reserved, pending, activeReservations] =
-      await Promise.all([
-        this.prisma.client.equipment.count(),
-        this.prisma.client.equipment.count({ where: { status: 'AVAILABLE' } }),
-        this.prisma.client.equipment.count({ where: { status: 'RENTED' } }),
-        this.prisma.client.equipment.count({ where: { status: 'RESERVED' } }),
-        this.prisma.client.reservation.count({ where: { status: 'PENDING' } }),
-        this.prisma.client.reservation.count({ where: { status: 'ACTIVE' } }),
-      ]);
+    const sevenMonthsAgo = new Date();
+    sevenMonthsAgo.setMonth(sevenMonthsAgo.getMonth() - 6);
+    sevenMonthsAgo.setDate(1);
+    sevenMonthsAgo.setHours(0, 0, 0, 0);
+
+    const [
+      total,
+      available,
+      rented,
+      reserved,
+      pending,
+      activeReservations,
+      byCategory,
+      reservations,
+    ] = await Promise.all([
+      this.prisma.client.equipment.count({
+        where: { active: true },
+      }),
+
+      this.prisma.client.equipment.count({
+        where: { active: true, status: 'AVAILABLE' },
+      }),
+
+      this.prisma.client.equipment.count({
+        where: { active: true, status: 'RENTED' },
+      }),
+
+      this.prisma.client.equipment.count({
+        where: { active: true, status: 'RESERVED' },
+      }),
+
+      this.prisma.client.reservation.count({
+        where: { status: 'PENDING' },
+      }),
+
+      this.prisma.client.reservation.count({
+        where: { status: 'ACTIVE' },
+      }),
+
+      this.prisma.client.equipment.groupBy({
+        by: ['category'],
+        where: { active: true },
+        _count: { _all: true },
+      }),
+
+      this.prisma.client.reservation.findMany({
+        select: { createdAt: true },
+        where: {
+          createdAt: {
+            gte: sevenMonthsAgo,
+          },
+        },
+      }),
+    ]);
+
     return {
-      equipment: { total, available, rented, reserved },
-      reservations: { pending, active: activeReservations },
+      equipment: {
+        total,
+        available,
+        rented,
+        reserved,
+      },
+
+      equipmentStructure: byCategory.map((item) => ({
+        category: item.category,
+        count: item._count._all,
+      })),
+
+      rentalMonthly: await this.buildMonthlyReservationCounts(reservations),
+
+      reservations: {
+        pending,
+        active: activeReservations,
+      },
     };
   }
 }
