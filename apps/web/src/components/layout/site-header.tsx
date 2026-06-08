@@ -1,10 +1,11 @@
-"use client"
+"use client";
 
-import { usePathname } from "next/navigation"
-import { Separator } from "@/components/ui/separator"
-import { SidebarTrigger } from "@/components/ui/sidebar"
-import { Button } from "@/components/ui/button"
-import { BellIcon, PlusIcon } from "lucide-react"
+import { BellIcon, PlusIcon } from "lucide-react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 
 const PAGE_TITLES: Record<string, string> = {
   "/dashboard": "Dashboard",
@@ -13,18 +14,20 @@ const PAGE_TITLES: Record<string, string> = {
   "/returns": "Returns",
   "/reports": "Reports",
   "/users": "Users",
-}
+};
 
 export function SiteHeader() {
-  const pathname = usePathname()
-  const title = PAGE_TITLES[pathname] ?? "EquipRent"
+  const pathname = usePathname();
+  const title = PAGE_TITLES[pathname] ?? "EquipRent";
+  const isEquipmentPage =
+    pathname === "/equipment" || pathname.startsWith("/equipment/");
 
   const today = new Date().toLocaleDateString("en-GB", {
     weekday: "long",
     day: "numeric",
     month: "long",
     year: "numeric",
-  })
+  });
 
   return (
     <header className="flex h-(--header-height) shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-(--header-height)">
@@ -35,7 +38,6 @@ export function SiteHeader() {
           className="mx-2 data-[orientation=vertical]:h-4"
         />
 
-        {/* title + date */}
         <div className="flex flex-col justify-center">
           <h1 className="text-base font-semibold leading-tight">{title}</h1>
           <span className="text-[11px] text-muted-foreground hidden sm:block">
@@ -43,22 +45,32 @@ export function SiteHeader() {
           </span>
         </div>
 
-        {/* right side */}
         <div className="ml-auto flex items-center gap-2">
-          <Button variant="ghost" size="icon" className="relative">
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            className="relative"
+            aria-label="Notifications"
+          >
             <BellIcon className="size-4" />
             <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-blue-500 rounded-full" />
           </Button>
 
-          <Button
-            size="sm"
-            className="bg-blue-600 hover:bg-blue-500 text-white gap-1.5"
-          >
-            <PlusIcon className="size-4" />
-            Add Equipment
-          </Button>
+          {!isEquipmentPage && (
+            <Button
+              asChild
+              size="sm"
+              className="bg-blue-600 hover:bg-blue-500 text-white gap-1.5"
+            >
+              <Link href="/equipment">
+                <PlusIcon className="size-4" />
+                Add Equipment
+              </Link>
+            </Button>
+          )}
         </div>
       </div>
     </header>
-  )
+  );
 }
