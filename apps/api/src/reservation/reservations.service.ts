@@ -12,7 +12,8 @@ import { Reservation, Role } from '@equiprent/db';
 @Injectable()
 export class ReservationService {
   constructor(private readonly prisma: PrismaService) {}
-  // Create a reservation with validation and transactional integrity
+
+  // Create a reservation with validation and equipment availability check
   async create(
     dto: CreateReservationDto,
     userId: string,
