@@ -2,7 +2,7 @@ import { cookies } from "next/headers";
 import { Suspense } from "react";
 import { AddEquipmentDialog } from "@/components/equipment/add-equipment-dialog";
 import { EquipmentFilters } from "@/components/equipment/equipment-filters";
-import { EquipmentTable } from "@/components/equipment/equipment-table";
+import { EquipmentManager } from "@/components/equipment/equipment-manager";
 import { apiFetch } from "@/lib/api";
 import type { Equipment } from "@/types/equipment";
 
@@ -69,7 +69,7 @@ export default async function EquipmentPage({
 				<EquipmentFilters categories={categories} />
 			</Suspense>
 
-			<EquipmentTable equipment={equipment} />
+			<EquipmentManager equipment={equipment} />
 		</div>
 	);
 }

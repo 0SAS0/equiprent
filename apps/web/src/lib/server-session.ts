@@ -8,6 +8,7 @@ export type BetterAuthSession = {
 		email: string;
 		name?: string | null;
 		emailVerified?: boolean;
+		role: "STUDENT" | "STAFF" | "EQUIPMENT_MANAGER" | "ADMIN";
 	};
 	session: {
 		id: string;

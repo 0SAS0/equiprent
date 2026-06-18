@@ -149,6 +149,7 @@ export default function CreateReservationDialog({
 							<Input
 								id="end-date"
 								type="date"
+								min={new Date().toISOString().split("T")[0]}
 								aria-invalid={Boolean(errors.endDate)}
 								{...register("endDate")}
 							/>
@@ -171,7 +172,10 @@ export default function CreateReservationDialog({
 								Cancel
 							</Button>
 						</DialogClose>
-						<Button type="submit" disabled={equipment.length === 0}>
+						<Button
+							type="submit"
+							disabled={isSubmitting || equipment.length === 0}
+						>
 							{isSubmitting ? "Adding..." : "Add reservation"}
 						</Button>
 					</DialogFooter>

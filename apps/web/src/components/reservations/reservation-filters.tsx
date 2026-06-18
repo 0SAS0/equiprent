@@ -30,6 +30,7 @@ export function ReservationFilters() {
 		const query = params.toString();
 		router.push(query ? `?${query}` : "?", { scroll: false });
 	}
+
 	return (
 		<div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_220px]">
 			<div className="relative">

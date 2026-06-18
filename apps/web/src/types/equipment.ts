@@ -1,3 +1,11 @@
+export type equipmetStatus =
+  |"AVAILABLE"
+  |"RESERVED"
+  |"RENTED"
+  |"MAINTENANCE"
+  |"DAMAGED"
+  |"RETIRED"
+
 export interface Equipment {
 	id: string;
 	name: string;
@@ -7,7 +15,7 @@ export interface Equipment {
 	model?: string;
 	locationBuilding?: string;
 	locationRoom?: string;
-	status: string;
+	status: equipmetStatus;
 	maxRentalDays: number;
 	active: boolean;
 	createdAt: string;
