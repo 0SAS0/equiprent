@@ -29,6 +29,7 @@
     "@nestjs/mapped-types": "^2.1.1",
     "@nestjs/passport": "^11.0.5",
     "@nestjs/platform-express": "^11.0.1",
+    "@nestjs/schedule": "^6.1.3",
     "@thallesp/nestjs-better-auth": "^2.6.0",
     "bcryptjs": "^3.0.3",
     "better-auth": "^1.6.5",
