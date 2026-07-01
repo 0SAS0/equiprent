@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import FaultReportDialog from "@/components/returns/(faults)/fault-report-dialog";
-// import FaultReportsTable from "@/components/returns/faults/fault-reports-table";
+import { FaultReportsTable } from "@/components/returns/(faults)/fault-reports-table";
 import ProcessReturnDialog from "@/components/returns/process-return-dialog";
 import { ReturnHistoryTable } from "@/components/returns/return-history-table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -68,7 +68,7 @@ export default async function ReturnsPage() {
 					<div className="flex justify-end mb-4">
 						<FaultReportDialog equipment={equipment} />
 					</div>
-					{/* <FaultReportsTable faults={faults} /> */}
+					<FaultReportsTable faults={faults} />
 				</TabsContent>
 			</Tabs>
 		</div>
