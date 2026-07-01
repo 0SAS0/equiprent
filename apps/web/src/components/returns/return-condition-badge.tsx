@@ -1,12 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-
-type EquipmentCondition =
-  | "PERFECT"
-  | "GOOD"
-  | "MINOR_DAMAGE"
-  | "MAJOR_DAMAGE"
-  | "BROKEN";
+import type { EquipmentCondition } from "@/types/returns";
 
 const conditionColors: Record<EquipmentCondition, string> = {
   PERFECT: "bg-green-500/10 text-green-500",
