@@ -147,7 +147,20 @@ export class ReturnsService {
       include: {
         reservation: {
           include: {
-            user: true,
+            user: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+              },
+            },
+            equipment: {
+              select: {
+                id: true,
+                name: true,
+                serialNumber: true,
+              },
+            },
           },
         },
       },

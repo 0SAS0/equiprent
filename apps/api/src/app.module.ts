@@ -6,6 +6,7 @@ import auth from './auth';
 import { EquipmentModule } from './equipment/equipment.module';
 import { ReservationModule } from './reservation/reservations.module';
 import { ScheduleModule } from '@nestjs/schedule';
+import { ReturnsModule } from './returns/returns.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { ScheduleModule } from '@nestjs/schedule';
     AuthModule.forRoot({ auth }),
     EquipmentModule,
     ReservationModule,
+    ReturnsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
