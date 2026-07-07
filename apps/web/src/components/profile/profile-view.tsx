@@ -6,7 +6,6 @@ import {
 	ClockIcon,
 	IdCardIcon,
 	ListChecksIcon,
-	MailIcon,
 	PencilIcon,
 	PhoneIcon,
 	ShieldCheckIcon,
@@ -17,7 +16,7 @@ import { useState } from "react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { UserRoleBadge } from "@/components/users/user-role-badge";
 import { cn } from "@/lib/utils";
