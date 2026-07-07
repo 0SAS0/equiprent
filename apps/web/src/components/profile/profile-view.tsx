@@ -17,7 +17,6 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
 import { UserRoleBadge } from "@/components/users/user-role-badge";
 import { cn } from "@/lib/utils";
 import type { UserProfile } from "@/types/users";
@@ -100,12 +99,12 @@ export function ProfileView({ user }: { user: UserProfile }) {
 	).length;
 
 	return (
-		<div className="grid grid-cols-1 gap-6 py-2 lg:grid-cols-[300px_1fr]">
-			<Card className="h-fit lg:sticky lg:top-4">
-				<CardContent className="flex flex-col items-center gap-4 text-center">
-					<div className="relative">
-						<Avatar className="size-24 ring-4 ring-primary/10">
-							<AvatarFallback className="bg-linear-to-br from-blue-600 to-indigo-600 text-2xl font-semibold text-white">
+		<div className="flex flex-col gap-6 py-2">
+			<Card>
+				<CardContent className="flex flex-col items-center gap-4 text-center sm:flex-row sm:items-center sm:text-left">
+					<div className="relative shrink-0">
+						<Avatar className="size-20 ring-4 ring-primary/10">
+							<AvatarFallback className="bg-linear-to-br from-blue-600 to-indigo-600 text-xl font-semibold text-white">
 								{getInitials(user.name)}
 							</AvatarFallback>
 						</Avatar>
@@ -117,81 +116,87 @@ export function ProfileView({ user }: { user: UserProfile }) {
 						/>
 					</div>
 
-					<div>
+					<div className="flex min-w-0 flex-1 flex-col items-center gap-2 sm:items-start">
 						<h1 className="text-lg font-semibold">
 							{user.name ?? "Unnamed user"}
 						</h1>
 						<p className="text-sm text-muted-foreground">{user.email}</p>
-					</div>
-
-					<div className="flex flex-wrap items-center justify-center gap-2">
-						<UserRoleBadge role={user.role} />
-						<Badge
-							variant={user.active ? "outline" : "destructive"}
-							className="px-1.5"
-						>
-							{user.active ? "Active" : "Inactive"}
-						</Badge>
-					</div>
-
-					<Button onClick={() => setEditOpen(true)} className="w-full gap-1.5">
-						<PencilIcon className="size-4" />
-						Edit profile
-					</Button>
-
-					<Separator />
-
-					<div className="flex w-full flex-col gap-4">
-						<InfoRow
-							icon={<PhoneIcon className="size-4" />}
-							label="Phone"
-							value={user.phone ?? "Not provided"}
-						/>
-						<InfoRow
-							icon={<IdCardIcon className="size-4" />}
-							label="Student ID"
-							value={user.studentId ?? "Not provided"}
-						/>
-						<InfoRow
-							icon={
-								user.emailVerified ? (
-									<ShieldCheckIcon className="size-4 text-green-500" />
-								) : (
-									<ShieldOffIcon className="size-4 text-yellow-500" />
-								)
-							}
-							label="Email verification"
-							value={user.emailVerified ? "Verified" : "Not verified"}
-						/>
-						<InfoRow
-							icon={<CalendarIcon className="size-4" />}
-							label="Member since"
-							value={formatDate(user.createdAt)}
-						/>
+						<div className="flex flex-wrap items-center justify-center gap-2 sm:justify-start">
+							<UserRoleBadge role={user.role} />
+							<Badge
+								variant={user.active ? "outline" : "destructive"}
+								className="px-1.5"
+							>
+								{user.active ? "Active" : "Inactive"}
+							</Badge>
+						</div>
 					</div>
 				</CardContent>
 			</Card>
 
-			<div className="flex flex-col gap-6">
-				<div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-					<StatCard
-						icon={<ListChecksIcon className="size-5" />}
-						label="Recent reservations"
-						value={user.reservations.length}
-					/>
-					<StatCard
-						icon={<ClockIcon className="size-5" />}
-						label="In progress"
-						value={activeCount}
-					/>
-					<StatCard
-						icon={<CheckCircle2Icon className="size-5" />}
-						label="Completed"
-						value={completedCount}
-					/>
-				</div>
+			<div className="grid grid-cols-1 gap-6 lg:grid-cols-[300px_1fr]">
+				<Card className="h-fit lg:sticky lg:top-4">
+					<CardContent className="flex flex-col gap-4">
+						<Button
+							onClick={() => setEditOpen(true)}
+							className="w-full gap-1.5"
+						>
+							<PencilIcon className="size-4" />
+							Edit profile
+						</Button>
 
-				<ProfileReservations reservations={user.reservations} />
+						<div className="flex flex-col gap-4">
+							<InfoRow
+								icon={<PhoneIcon className="size-4" />}
+								label="Phone"
+								value={user.phone ?? "Not provided"}
+							/>
+							<InfoRow
+								icon={<IdCardIcon className="size-4" />}
+								label="Student ID"
+								value={user.studentId ?? "Not provided"}
+							/>
+							<InfoRow
+								icon={
+									user.emailVerified ? (
+										<ShieldCheckIcon className="size-4 text-green-500" />
+									) : (
+										<ShieldOffIcon className="size-4 text-yellow-500" />
+									)
+								}
+								label="Email verification"
+								value={user.emailVerified ? "Verified" : "Not verified"}
+							/>
+							<InfoRow
+								icon={<CalendarIcon className="size-4" />}
+								label="Member since"
+								value={formatDate(user.createdAt)}
+							/>
+						</div>
+					</CardContent>
+				</Card>
+
+				<div className="flex flex-col gap-6">
+					<div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+						<StatCard
+							icon={<ListChecksIcon className="size-5" />}
+							label="Recent reservations"
+							value={user.reservations.length}
+						/>
+						<StatCard
+							icon={<ClockIcon className="size-5" />}
+							label="In progress"
+							value={activeCount}
+						/>
+						<StatCard
+							icon={<CheckCircle2Icon className="size-5" />}
+							label="Completed"
+							value={completedCount}
+						/>
+					</div>
+
+					<ProfileReservations reservations={user.reservations} />
+				</div>
 			</div>
 
 			<EditProfileDialog
