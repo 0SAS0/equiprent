@@ -7,6 +7,7 @@ import { EquipmentModule } from './equipment/equipment.module';
 import { ReservationModule } from './reservation/reservations.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { ReturnsModule } from './returns/returns.module';
+import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { ReturnsModule } from './returns/returns.module';
     EquipmentModule,
     ReservationModule,
     ReturnsModule,
+    UsersModule,
   ],
   controllers: [AppController],
   providers: [AppService],
