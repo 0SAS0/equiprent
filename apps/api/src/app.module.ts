@@ -8,6 +8,7 @@ import { ReservationModule } from './reservation/reservations.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { ReturnsModule } from './returns/returns.module';
 import { UsersModule } from './users/users.module';
+import { NotificationModule } from './notification/notification.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { UsersModule } from './users/users.module';
     ReservationModule,
     ReturnsModule,
     UsersModule,
+    NotificationModule,
   ],
   controllers: [AppController],
   providers: [AppService],
