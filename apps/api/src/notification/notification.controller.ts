@@ -1,6 +1,9 @@
 import {
   Controller,
   ForbiddenException,
+  Get,
+  Param,
+  Patch,
   Post,
   UseGuards,
 } from '@nestjs/common';
@@ -14,6 +17,24 @@ import { NotificationService } from './notification.service';
 @UseGuards(AuthGuard)
 export class NotificationController {
   constructor(private readonly notificationService: NotificationService) {}
+
+  @Get('me')
+  findMine(@Session() session: UserSession<typeof auth>) {
+    return this.notificationService.findForUser(session.user.id);
+  }
+
+  @Patch('read-all')
+  markAllRead(@Session() session: UserSession<typeof auth>) {
+    return this.notificationService.markAllAsRead(session.user.id);
+  }
+
+  @Patch(':id/read')
+  markRead(
+    @Param('id') id: string,
+    @Session() session: UserSession<typeof auth>,
+  ) {
+    return this.notificationService.markAsRead(id, session.user.id);
+  }
 
   @Post('run-reminders')
   async runReminders(@Session() session: UserSession<typeof auth>) {

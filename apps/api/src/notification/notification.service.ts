@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { Resend } from 'resend';
 import { PrismaService } from '../prisma/prisma.service';
 import { NotificationType, ReservationStatus } from '@equiprent/db';
@@ -13,6 +13,37 @@ export class NotificationService {
   private readonly logger = new Logger(NotificationService.name);
 
   constructor(private prisma: PrismaService) {}
+
+  async findForUser(userId: string, take = 20) {
+    return this.prisma.client.notification.findMany({
+      where: { userId },
+      orderBy: { createdAt: 'desc' },
+      take,
+    });
+  }
+
+  async markAsRead(id: string, userId: string) {
+    const notification = await this.prisma.client.notification.findUnique({
+      where: { id },
+    });
+
+    if (!notification || notification.userId !== userId) {
+      throw new NotFoundException('Notification not found');
+    }
+
+    return this.prisma.client.notification.update({
+      where: { id },
+      data: { read: true },
+    });
+  }
+
+  async markAllAsRead(userId: string) {
+    await this.prisma.client.notification.updateMany({
+      where: { userId, read: false },
+      data: { read: true },
+    });
+    return { ok: true };
+  }
 
   async sendReturnReminders() {
     const now = new Date();

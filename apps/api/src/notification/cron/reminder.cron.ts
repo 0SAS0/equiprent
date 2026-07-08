@@ -8,7 +8,7 @@ export class ReminderCron {
 
   constructor(private readonly notificationService: NotificationService) {}
 
-  @Cron(CronExpression.EVERY_HOUR)
+  @Cron(CronExpression.EVERY_DAY_AT_8AM)
   async handleReminders() {
     this.logger.log('Checking upcoming return reminders...');
     await this.notificationService.sendReturnReminders();

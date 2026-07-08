@@ -1,11 +1,12 @@
 "use client";
 
-import { BellIcon, PlusIcon } from "lucide-react";
+import { PlusIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import { NotificationBell } from "./notification-bell";
 
 const PAGE_TITLES: Record<string, string> = {
 	"/dashboard": "Dashboard",
@@ -47,16 +48,7 @@ export function SiteHeader() {
 				</div>
 
 				<div className="ml-auto flex items-center gap-2">
-					<Button
-						type="button"
-						variant="ghost"
-						size="icon"
-						className="relative"
-						aria-label="Notifications"
-					>
-						<BellIcon className="size-4" />
-						<span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-blue-500 rounded-full" />
-					</Button>
+					<NotificationBell />
 
 					{!isEquipmentPage && (
 						<Button
