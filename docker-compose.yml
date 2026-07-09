@@ -15,17 +15,19 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
-  # report-service:
-  #   build: ./apps/report-service
-  #   container_name: equiprent_reports
-  #   environment:
-  #     DATABASE_URL: postgresql://equiprent:equiprent_secret@postgres:5432/equiprent
-  #     PORT: 3001
-  #   ports:
-  #     - "3001:3001"
-  #   depends_on:
-  #     postgres:
-  #       condition: service_healthy
-
+  report-service:
+    build: ./apps/report-service
+    container_name: equiprent_reports
+    environment:
+        DB_HOST: postgres
+        DB_NAME: equiprent
+        DB_USER: equiprent
+        DB_PASSWORD: equiprent_secret
+        PORT: 3002
+    ports:
+      - "3002:3002"
+    depends_on:
+      postgres:
+        condition: service_healthy
 volumes:
   postgres_data:

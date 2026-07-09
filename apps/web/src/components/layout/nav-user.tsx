@@ -1,7 +1,6 @@
 "use client";
 
 import {
-	BellIcon,
 	CircleUserRoundIcon,
 	EllipsisVerticalIcon,
 	LogOutIcon,
@@ -109,10 +108,6 @@ export function NavUser() {
 									<CircleUserRoundIcon />
 									Account
 								</Link>
-							</DropdownMenuItem>
-							<DropdownMenuItem>
-								<BellIcon />
-								Notifications
 							</DropdownMenuItem>
 						</DropdownMenuGroup>
 						<DropdownMenuSeparator />
