@@ -9,6 +9,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { ReturnsModule } from './returns/returns.module';
 import { UsersModule } from './users/users.module';
 import { NotificationModule } from './notification/notification.module';
+import { ReportsModule } from './reports/reports.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { NotificationModule } from './notification/notification.module';
     ReturnsModule,
     UsersModule,
     NotificationModule,
+    ReportsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

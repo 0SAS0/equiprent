@@ -1,5 +1,6 @@
 (ns report-service.db
-  (:require [next.jdbc :as jdbc]))
+  (:require [next.jdbc :as jdbc]
+            [next.jdbc.result-set :as rs]))
 
 (def db-spec
   {:dbtype   "postgresql"
@@ -17,18 +18,18 @@
   (jdbc/execute!
    (get-ds)
    ["SELECT
-       r.id,
-       r.status,
-       r.\"startDate\",
-       r.\"endDate\",
-       r.\"actualReturnDate\",
-       r.\"purposeNote\",
+       r.id AS id,
+       r.status AS status,
+       r.\"startDate\" AS start_date,
+       r.\"endDate\" AS end_date,
+       r.\"actualReturnDate\" AS actual_return_date,
+       r.\"purposeNote\" AS purpose_note,
 
-       e.name  AS equipment_name,
-       e.category,
-       e.\"serialNumber\",
+       e.name AS equipment_name,
+       e.category AS equipment_category,
+       e.\"serialNumber\" AS equipment_serial_number,
 
-       u.name  AS user_name,
+       u.name AS user_name,
        u.email AS user_email
 
      FROM \"Reservation\" r
@@ -43,16 +44,18 @@
 
      ORDER BY r.\"startDate\" DESC"
     from
-    to]))
+    to]
+   {:builder-fn rs/as-unqualified-lower-maps}))
 
 (defn get-equipment-stats []
   (jdbc/execute!
    (get-ds)
    ["SELECT
-       category,
-       status,
+       category AS category,
+       status AS status,
        COUNT(*) AS count
      FROM \"Equipment\"
      WHERE active = true
      GROUP BY category, status
-     ORDER BY category"]))
+     ORDER BY category"]
+   {:builder-fn rs/as-unqualified-lower-maps}))

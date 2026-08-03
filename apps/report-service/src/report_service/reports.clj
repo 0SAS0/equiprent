@@ -9,20 +9,25 @@
   (when date
     (.toString date)))
 
+(defn temporal-date-time [date]
+  (cond
+    (instance? java.sql.Timestamp date) (.toLocalDateTime date)
+    :else date))
+
 ;; --- map — data transformation ---
 
 (defn reservation->csv-row
   "Transforms one reservation record into a CSV line"
   [r]
-  [(:reservation/id r)
-   (:equipment/name r "")
-   (:equipment/category r "")
-   (:user/name r "")
-   (:user/email r "")
-   (format-date (:reservation/start_date r))
-   (format-date (:reservation/end_date r))
-   (:reservation/status r "")
-   (format-date (:reservation/actual_return_date r))])
+  [(:id r)
+   (:equipment_name r "")
+   (:equipment_category r "")
+   (:user_name r "")
+   (:user_email r "")
+   (format-date (:start_date r))
+   (format-date (:end_date r))
+   (:status r "")
+   (format-date (:actual_return_date r))])
 
 ;; --- filter — data filtering ---
 
@@ -30,18 +35,18 @@
   "Filters reservations by status"
   [status reservations]
   (if status
-    (filter #(= (:reservation/status %) status) reservations)
+    (filter #(= (:status %) status) reservations)
     reservations))
 
 (defn filter-returned
   "Returns only returned reservations"
   [reservations]
-  (filter #(= (:reservation/status %) "RETURNED") reservations))
+  (filter #(= (:status %) "RETURNED") reservations))
 
 (defn filter-active
   "Returns only active reservations"
   [reservations]
-  (filter #(contains? #{"ACTIVE" "CONFIRMED"} (:reservation/status %))
+  (filter #(contains? #{"ACTIVE" "CONFIRMED"} (:status %))
           reservations))
 
 ;; --- reduce — data aggregation ---
@@ -50,7 +55,7 @@
   "Aggregates hardware statistics per category by reduce"
   [equipment-stats]
   (reduce (fn [acc row]
-            (let [category (:Equipment/category row)
+            (let [category (:category row)
                   count    (:count row 0)]
             (if category
               (update acc category (fnil + 0) count)
@@ -62,7 +67,7 @@
   "Counts reservations per status by reduce"
   [reservations]
   (reduce (fn [acc r]
-            (let [status (:Reservation/status r)]
+            (let [status (:status r)]
               (if status
                 (update acc status (fnil inc 0))
                 acc)))
@@ -73,10 +78,12 @@
   "Sums the total number of days borrowed by reduce"
   [reservations]
   (reduce (fn [acc r]
-            (let [start (:Reservation/start_date r)
-                  end   (:Reservation/end_date r)]
+            (let [start (:start_date r)
+                  end   (:end_date r)]
               (if (and start end)
-                (+ acc (.between (java.time.temporal.ChronoUnit/DAYS) start end))
+                (+ acc (.between java.time.temporal.ChronoUnit/DAYS
+                                 (temporal-date-time start)
+                                 (temporal-date-time end)))
                 acc)))
           0
           reservations))
@@ -100,8 +107,8 @@
                    :or {status-filter identity
                         transform-fn identity}}]
   (->> reservations
-       status-filter    ; function passed as an argument
-       transform-fn     ; function passed as an argument
+       status-filter
+       transform-fn
        (map reservation->csv-row)))
 
 ;; --- GENERATING CSV ---
@@ -131,7 +138,7 @@
         returned       (filter-returned reservations)
         total-days     (total-rental-days returned)
         popular        (->> reservations
-                            (map :Equipment/equipment_name)
+                            (map :equipment_name)
                             (remove nil?)
                             frequencies
                             (sort-by val >)

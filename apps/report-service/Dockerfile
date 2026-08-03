@@ -2,10 +2,13 @@ FROM eclipse-temurin:21-jdk
 
 WORKDIR /app
 
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends curl \
+    && rm -rf /var/lib/apt/lists/*
+
 COPY . .
 
 RUN curl -L https://github.com/clojure/brew-install/releases/latest/download/linux-install.sh | bash
+RUN clojure -P -M:run
 
-RUN clj -T:build uber
-
-CMD ["java","-jar","target/report-service-0.1.0.jar"]
+CMD ["clojure", "-M:run"]
