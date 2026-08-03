@@ -1,7 +1,11 @@
 (ns report-service.reports
-  (:require [clojure.data.csv :as csv]
+  (:require [clj-pdf.core :refer [pdf]]
+            [clojure.data.csv :as csv]
             [clojure.data.json :as json]
-            [report-service.db :as db]))
+            [report-service.db :as db])
+  (:import [java.io ByteArrayOutputStream]
+           [java.time LocalDateTime]
+           [java.time.format DateTimeFormatter]))
 
 ;; --- HELPER FUNCTIONS ---
 
@@ -13,6 +17,14 @@
   (cond
     (instance? java.sql.Timestamp date) (.toLocalDateTime date)
     :else date))
+
+(defn report-period [from to]
+  (str from " - " to))
+
+(def timestamp-formatter (DateTimeFormatter/ofPattern "yyyy-MM-dd HH:mm:ss"))
+
+(defn format-timestamp [^LocalDateTime ldt]
+  (.format ldt timestamp-formatter))
 
 ;; --- map — data transformation ---
 
@@ -148,3 +160,131 @@
      :total-rental-days      total-days
      :most-popular-equipment popular
      :total-reservations     (count reservations)}))
+
+;; --- GENERATING PDF ---
+
+(def brand-navy [15 23 42])         ; near-black, used for headings and titles
+(def brand-blue [37 99 235])        ; blue accent
+(def brand-gray [71 85 105])        ; muted text
+(def brand-light-gray [241 245 249]); light backdrop for cards / column headers
+(def brand-border [203 213 225])    ; borders
+(def white [255 255 255])
+
+(defn metric-cell
+  "A single, bordered and centered KPI card used in the executive summary row."
+  [label value background]
+  [:pdf-cell {:background-color background
+              :border true
+              :border-color brand-border
+              :align :center
+              :valign :middle
+              :padding 12
+              :min-height 55}
+   [:paragraph {:align :center}
+    [:phrase {:style :bold :size 9 :color brand-gray} (str label "\n")]
+    [:phrase {:style :bold :size 18 :color brand-navy} (str value)]]])
+
+(defn metrics-table
+  "Executive summary KPI cards, evenly spaced, centered, and bordered."
+  [stats]
+  [:pdf-table {:width-percent 100 :spacing-after 18 :horizontal-align :center}
+   [25 25 25 25]
+   [(metric-cell "Total reservations" (:total-reservations stats) white)
+    (metric-cell "Rental days" (:total-rental-days stats) brand-light-gray)
+    (metric-cell "Statuses tracked" (count (:reservations-by-status stats)) white)
+    (metric-cell "Categories" (count (:equipment-by-category stats)) brand-light-gray)]])
+
+(defn titled-pdf-table
+  "A pdf-table with an embedded dark title bar spanning all columns (the
+  table's name), followed by a light column-header row and data rows."
+  [title columns widths rows empty-row]
+  (into
+   [:pdf-table {:header [[[:pdf-cell {:colspan (count columns)
+                                       :background-color brand-navy
+                                       :align :center
+                                       :padding 8}
+                            [:paragraph {:align :center :style :bold :color white}
+                             title]]]
+                          (mapv (fn [column]
+                                  [:pdf-cell {:background-color brand-light-gray
+                                              :padding 6}
+                                   [:phrase {:style :bold :size 9 :color brand-navy} column]])
+                                columns)]
+                :width-percent 100
+                :spacing-after 16
+                :no-split-rows? true}
+    widths]
+   (if (seq rows) rows [empty-row])))
+
+(defn breakdown-table
+  "A titled two-column table (label/count) used for status, category, and
+  popularity breakdowns. Accepts a map or a seq of [label count] pairs."
+  [title column-title rows]
+  (titled-pdf-table
+   title
+   [column-title "Count"]
+   [70 30]
+   (map (fn [[label value]] [(str label) (str value)]) rows)
+   ["No data available" "0"]))
+
+(defn reservations-table
+  "Detailed, titled table of reservation rows for the report period."
+  [reservations]
+  (titled-pdf-table
+   "Reservation details"
+   ["Equipment" "Category" "User" "Email" "Start" "End" "Status"]
+   [16 16 12 15 19 11 11]
+   (map (fn [r]
+          [(:equipment_name r "")
+           (:equipment_category r "")
+           (:user_name r "")
+           (:user_email r "")
+           (or (format-date (:start_date r)) "")
+           (or (format-date (:end_date r)) "")
+           (:status r "")])
+        reservations)
+   ["No reservations match the selected filters." "" "" "" "" "" ""]))
+
+(defn generate-pdf
+  "Generates a branded PDF report with executive summary, breakdowns, and
+  reservation details for the given period."
+  [from to & {:keys [status]}]
+  (let [reservations (->> (db/get-reservations from to)
+                          (filter-by-status status))
+        stats        (generate-stats from to)
+        output       (ByteArrayOutputStream.)]
+    (pdf
+     [{:title "EquipRent report"
+       :author "EquipRent"
+       :subject "Reservation report"
+       :size :a4
+       :orientation :landscape
+       :left-margin 28
+       :right-margin 28
+       :top-margin 28
+       :bottom-margin 34
+       :footer {:text "EquipRent - confidential" :align :center}}
+
+      [:chunk {:style :bold :size 24 :color brand-navy} "EquipRent"]
+      [:chunk {:size 13 :color brand-blue} "  Rental intelligence report"]
+      [:spacer 1]
+      [:paragraph {:size 10 :color brand-gray}
+       (str "Generated at " (format-timestamp (LocalDateTime/now))
+            " | Period: " (report-period from to)
+            (when status (str " | Status filter: " status)))]
+      [:line {:color brand-blue}]
+      [:spacer 1]
+
+      [:heading {:style {:size 16 :color brand-navy}} "Executive summary"]
+      [:spacer 1]
+      (metrics-table stats)
+
+      [:spacer 1]
+      (breakdown-table "Reservations by status" "Status" (:reservations-by-status stats))
+      (breakdown-table "Equipment by category" "Category" (:equipment-by-category stats))
+      (breakdown-table "Most popular equipment" "Equipment" (:most-popular-equipment stats))
+
+      [:pagebreak]
+      (reservations-table reservations)]
+     output)
+    (.toByteArray output)))

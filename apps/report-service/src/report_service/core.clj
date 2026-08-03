@@ -10,6 +10,7 @@
 (defroutes app-routes
   (GET "/health"       request (handlers/health-handler request))
   (GET "/report/csv"   request (handlers/csv-report-handler request))
+  (GET "/report/pdf"   request (handlers/pdf-report-handler request))
   (GET "/report/stats" request (handlers/stats-handler request))
   (not-found {:status 404
               :headers {"Content-Type" "application/json"}

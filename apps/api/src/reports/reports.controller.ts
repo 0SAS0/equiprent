@@ -34,6 +34,28 @@ export class ReportsController {
     res.send(csv);
   }
 
+  @Get('pdf')
+  async getPdfReport(
+    @Query('from') from: string,
+    @Query('to') to: string,
+    @Query('status') status: string,
+    @Res() res: Response,
+  ) {
+    const response = await this.fetchReportService('/report/pdf', {
+      from,
+      to,
+      status,
+    });
+    const pdf = Buffer.from(await response.arrayBuffer());
+
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader(
+      'Content-Disposition',
+      'attachment; filename=equiprent-report.pdf',
+    );
+    res.send(pdf);
+  }
+
   @Get('stats')
   async getStats(@Query('from') from: string, @Query('to') to: string) {
     const response = await this.fetchReportService('/report/stats', {
