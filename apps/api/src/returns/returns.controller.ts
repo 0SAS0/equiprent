@@ -15,6 +15,7 @@ import type { UserSession } from '@thallesp/nestjs-better-auth';
 import { CreateFaultReportDto } from './dto/create-fault-report.dto';
 import { FaultStatus, Role } from '@equiprent/db';
 import { assertRole } from '../common/authorization';
+import { parsePagination } from '../common/pagination';
 
 @Controller('returns')
 @UseGuards(AuthGuard)
@@ -46,8 +47,13 @@ export class ReturnsController {
   findAllFaults(
     @Query('status') status?: FaultStatus,
     @Query('equipmentId') equipmentId?: string,
+    @Query('limit') limit?: string,
+    @Query('offset') offset?: string,
   ) {
-    return this.returnsService.findAllFaults({ status, equipmentId });
+    return this.returnsService.findAllFaults(
+      { status, equipmentId },
+      parsePagination({ limit, offset }),
+    );
   }
 
   @Patch('/faults/:id')
@@ -69,7 +75,14 @@ export class ReturnsController {
   }
 
   @Get('/history/:equipmentId')
-  getReturnHistory(@Param('equipmentId') equipmentId: string) {
-    return this.returnsService.getReturnHistory(equipmentId);
+  getReturnHistory(
+    @Param('equipmentId') equipmentId: string,
+    @Query('limit') limit?: string,
+    @Query('offset') offset?: string,
+  ) {
+    return this.returnsService.getReturnHistory(
+      equipmentId,
+      parsePagination({ limit, offset }),
+    );
   }
 }

@@ -5,6 +5,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { AuthGuard, Session } from '@thallesp/nestjs-better-auth';
@@ -12,6 +13,7 @@ import type { UserSession } from '@thallesp/nestjs-better-auth';
 import { Role } from '@equiprent/db';
 import type auth from '../auth';
 import { NotificationService } from './notification.service';
+import { parsePagination } from '../common/pagination';
 
 @Controller('notifications')
 @UseGuards(AuthGuard)
@@ -19,8 +21,15 @@ export class NotificationController {
   constructor(private readonly notificationService: NotificationService) {}
 
   @Get('me')
-  findMine(@Session() session: UserSession<typeof auth>) {
-    return this.notificationService.findForUser(session.user.id);
+  findMine(
+    @Session() session: UserSession<typeof auth>,
+    @Query('limit') limit?: string,
+    @Query('offset') offset?: string,
+  ) {
+    return this.notificationService.findForUser(
+      session.user.id,
+      parsePagination({ limit, offset }),
+    );
   }
 
   @Patch('read-all')

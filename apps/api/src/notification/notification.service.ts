@@ -4,6 +4,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { NotificationType, ReservationStatus } from '@equiprent/db';
 import { reminderTemplate } from './templates/reminder.template';
 import { overdueTemplate } from './templates/overdue.template';
+import type { PaginationOptions } from '../common/pagination';
 
 const from = 'EquipRent <onboarding@equiprent.me>';
 
@@ -14,11 +15,15 @@ export class NotificationService {
 
   constructor(private prisma: PrismaService) {}
 
-  async findForUser(userId: string, take = 20) {
+  async findForUser(
+    userId: string,
+    pagination: PaginationOptions = { take: 20, skip: 0 },
+  ) {
     return this.prisma.client.notification.findMany({
       where: { userId },
       orderBy: { createdAt: 'desc' },
-      take,
+      take: pagination.take,
+      skip: pagination.skip,
     });
   }
 

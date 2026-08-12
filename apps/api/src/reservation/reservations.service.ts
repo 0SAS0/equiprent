@@ -7,6 +7,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateReservationDto } from './dto/create-reservation.dto';
+import type { PaginationOptions } from '../common/pagination';
 import { Reservation, Role } from '@equiprent/db';
 
 @Injectable()
@@ -72,7 +73,11 @@ export class ReservationService {
     });
   }
   // Find all reservations, with role-based access control
-  findAll(userId: string, role: string): Promise<Reservation[]> {
+  findAll(
+    userId: string,
+    role: string,
+    pagination?: PaginationOptions,
+  ): Promise<Reservation[]> {
     const canSeeAll = role === Role.ADMIN || role === Role.EQUIPMENT_MANAGER;
     return this.prisma.client.reservation.findMany({
       where: canSeeAll ? {} : { userId },
@@ -86,6 +91,8 @@ export class ReservationService {
         },
       },
       orderBy: { createdAt: 'desc' },
+      take: pagination?.take,
+      skip: pagination?.skip,
     });
   }
   // Find a single reservation by ID, with access control.

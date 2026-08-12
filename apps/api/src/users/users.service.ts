@@ -3,16 +3,20 @@ import { PrismaService } from '../prisma/prisma.service';
 import { Role, User } from '@equiprent/db';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
+import type { PaginationOptions } from '../common/pagination';
 
 @Injectable()
 export class UsersService {
   constructor(private readonly prisma: PrismaService) {}
 
-  findAll(filters?: {
-    role?: Role;
-    active?: boolean;
-    search?: string;
-  }): Promise<User[]> {
+  findAll(
+    filters?: {
+      role?: Role;
+      active?: boolean;
+      search?: string;
+    },
+    pagination?: PaginationOptions,
+  ): Promise<User[]> {
     return this.prisma.client.user.findMany({
       where: {
         ...(filters?.role && { role: filters.role }),
@@ -26,6 +30,8 @@ export class UsersService {
         }),
       },
       orderBy: { createdAt: 'desc' },
+      take: pagination?.take,
+      skip: pagination?.skip,
     });
   }
 

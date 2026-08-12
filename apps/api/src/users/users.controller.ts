@@ -16,6 +16,7 @@ import { Role, User } from '@equiprent/db';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import type auth from '../auth';
+import { parsePagination } from '../common/pagination';
 
 function assertAdmin(session: UserSession<typeof auth>) {
   if (session.user.role !== Role.ADMIN) {
@@ -34,13 +35,18 @@ export class UsersController {
     @Query('role') role?: string,
     @Query('active') active?: string,
     @Query('search') search?: string,
+    @Query('limit') limit?: string,
+    @Query('offset') offset?: string,
   ): Promise<User[]> {
     assertAdmin(session);
-    return this.usersService.findAll({
-      role: role as Role,
-      active: active === undefined ? undefined : active === 'true',
-      search,
-    });
+    return this.usersService.findAll(
+      {
+        role: role as Role,
+        active: active === undefined ? undefined : active === 'true',
+        search,
+      },
+      parsePagination({ limit, offset }),
+    );
   }
 
   @Get('/stats')

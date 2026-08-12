@@ -16,6 +16,7 @@ import { Equipment, Role } from '@equiprent/db';
 import { CreateEquipmentDto } from './dto/create-equipment.dto';
 import { UpdateEquipmentDto } from './dto/update-equipment.dto';
 import { assertRole } from '../common/authorization';
+import { parsePagination } from '../common/pagination';
 
 @Controller('equipment')
 @UseGuards(AuthGuard)
@@ -27,12 +28,17 @@ export class EquipmentController {
     @Query('status') status?: string,
     @Query('category') category?: string,
     @Query('search') search?: string,
+    @Query('limit') limit?: string,
+    @Query('offset') offset?: string,
   ): Promise<Equipment[]> {
-    return this.equipmentService.findAll({
-      status: status as any,
-      category: category as any,
-      search,
-    });
+    return this.equipmentService.findAll(
+      {
+        status: status as any,
+        category: category as any,
+        search,
+      },
+      parsePagination({ limit, offset }),
+    );
   }
 
   @Get('/stats')

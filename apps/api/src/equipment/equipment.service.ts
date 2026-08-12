@@ -4,15 +4,19 @@ import { Equipment, EquipmentCategory, EquipmentStatus } from '@equiprent/db';
 import { NotFoundException } from '@nestjs/common';
 import { CreateEquipmentDto } from './dto/create-equipment.dto';
 import { UpdateEquipmentDto } from './dto/update-equipment.dto';
+import type { PaginationOptions } from '../common/pagination';
 
 @Injectable()
 export class EquipmentService {
   constructor(private readonly prisma: PrismaService) {}
-  findAll(filters?: {
-    status?: EquipmentStatus;
-    category?: EquipmentCategory;
-    search?: string;
-  }): Promise<Equipment[]> {
+  findAll(
+    filters?: {
+      status?: EquipmentStatus;
+      category?: EquipmentCategory;
+      search?: string;
+    },
+    pagination?: PaginationOptions,
+  ): Promise<Equipment[]> {
     return this.prisma.client.equipment.findMany({
       where: {
         active: true,
@@ -32,6 +36,8 @@ export class EquipmentService {
         }),
       },
       orderBy: { createdAt: 'desc' },
+      take: pagination?.take,
+      skip: pagination?.skip,
     });
   }
   async findOne(id: string): Promise<Equipment> {

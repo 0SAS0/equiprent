@@ -13,6 +13,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { CreateFaultReportDto } from './dto/create-fault-report.dto';
+import type { PaginationOptions } from '../common/pagination';
 
 @Injectable()
 export class ReturnsService {
@@ -94,10 +95,13 @@ export class ReturnsService {
       },
     });
   }
-  async findAllFaults(filters?: {
-    status?: FaultStatus;
-    equipmentId?: string;
-  }): Promise<FaultReport[]> {
+  async findAllFaults(
+    filters?: {
+      status?: FaultStatus;
+      equipmentId?: string;
+    },
+    pagination?: PaginationOptions,
+  ): Promise<FaultReport[]> {
     return this.prisma.client.faultReport.findMany({
       where: {
         ...(filters?.status && { status: filters.status }),
@@ -108,6 +112,8 @@ export class ReturnsService {
         reporter: true,
       },
       orderBy: { createdAt: 'desc' },
+      take: pagination?.take,
+      skip: pagination?.skip,
     });
   }
   async findOne(id: string): Promise<FaultReport> {
@@ -141,7 +147,7 @@ export class ReturnsService {
     });
   }
 
-  getReturnHistory(equipmentId: string) {
+  getReturnHistory(equipmentId: string, pagination?: PaginationOptions) {
     return this.prisma.client.returnRecord.findMany({
       where: { reservation: { equipmentId } },
       include: {
@@ -165,6 +171,8 @@ export class ReturnsService {
         },
       },
       orderBy: { createdAt: 'desc' },
+      take: pagination?.take,
+      skip: pagination?.skip,
     });
   }
 }

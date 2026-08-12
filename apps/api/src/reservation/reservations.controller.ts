@@ -5,6 +5,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
@@ -15,6 +16,7 @@ import { CreateReservationDto } from './dto/create-reservation.dto';
 import { Role } from '@equiprent/db';
 import type auth from '../auth';
 import { assertRole, getUserRole } from '../common/authorization';
+import { parsePagination } from '../common/pagination';
 
 @Controller('reservations')
 @UseGuards(AuthGuard)
@@ -27,7 +29,11 @@ export class ReservationController {
   }
 
   @Get()
-  findAll(@Session() session: UserSession<typeof auth>) {
+  findAll(
+    @Session() session: UserSession<typeof auth>,
+    @Query('limit') limit?: string,
+    @Query('offset') offset?: string,
+  ) {
     const role = session.user.role;
     if (
       role !== Role.STUDENT &&
@@ -38,7 +44,11 @@ export class ReservationController {
       throw new UnauthorizedException('Access denied');
     }
 
-    return this.reservationService.findAll(session.user.id, role);
+    return this.reservationService.findAll(
+      session.user.id,
+      role,
+      parsePagination({ limit, offset }),
+    );
   }
 
   @Get(':id')
