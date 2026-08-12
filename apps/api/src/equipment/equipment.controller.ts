@@ -12,9 +12,10 @@ import {
 import { AuthGuard, Session } from '@thallesp/nestjs-better-auth';
 import type { UserSession } from '@thallesp/nestjs-better-auth';
 import { EquipmentService } from './equipment.service';
-import { Equipment } from '@equiprent/db';
+import { Equipment, Role } from '@equiprent/db';
 import { CreateEquipmentDto } from './dto/create-equipment.dto';
 import { UpdateEquipmentDto } from './dto/update-equipment.dto';
+import { assertRole } from '../common/authorization';
 
 @Controller('equipment')
 @UseGuards(AuthGuard)
@@ -49,6 +50,11 @@ export class EquipmentController {
     @Body() dto: CreateEquipmentDto,
     @Session() session: UserSession,
   ): Promise<Equipment> {
+    assertRole(
+      session,
+      [Role.EQUIPMENT_MANAGER, Role.ADMIN],
+      'Only equipment managers and admins can create equipment',
+    );
     return this.equipmentService.create(dto, session.user.id);
   }
 
@@ -56,12 +62,26 @@ export class EquipmentController {
   update(
     @Param('id') id: string,
     @Body() dto: UpdateEquipmentDto,
+    @Session() session: UserSession,
   ): Promise<Equipment> {
+    assertRole(
+      session,
+      [Role.EQUIPMENT_MANAGER, Role.ADMIN],
+      'Only equipment managers and admins can update equipment',
+    );
     return this.equipmentService.update(id, dto);
   }
 
   @Delete('/:id')
-  remove(@Param('id') id: string): Promise<Equipment> {
+  remove(
+    @Param('id') id: string,
+    @Session() session: UserSession,
+  ): Promise<Equipment> {
+    assertRole(
+      session,
+      [Role.EQUIPMENT_MANAGER, Role.ADMIN],
+      'Only equipment managers and admins can delete equipment',
+    );
     return this.equipmentService.remove(id);
   }
 }

@@ -6,8 +6,15 @@ import {
   Res,
   UseGuards,
 } from '@nestjs/common';
-import { AuthGuard } from '@thallesp/nestjs-better-auth';
+import { AuthGuard, Session } from '@thallesp/nestjs-better-auth';
+import type { UserSession } from '@thallesp/nestjs-better-auth';
 import type { Response } from 'express';
+import { Role } from '@equiprent/db';
+import { assertRole } from '../common/authorization';
+
+const REPORT_ROLES = [Role.EQUIPMENT_MANAGER, Role.ADMIN];
+const REPORT_FORBIDDEN_MESSAGE =
+  'Only equipment managers and admins can access reports';
 
 @Controller('reports')
 @UseGuards(AuthGuard)
@@ -21,7 +28,9 @@ export class ReportsController {
     @Query('to') to: string,
     @Query('status') status: string,
     @Res() res: Response,
+    @Session() session: UserSession,
   ) {
+    assertRole(session, REPORT_ROLES, REPORT_FORBIDDEN_MESSAGE);
     const response = await this.fetchReportService('/report/csv', {
       from,
       to,
@@ -40,7 +49,9 @@ export class ReportsController {
     @Query('to') to: string,
     @Query('status') status: string,
     @Res() res: Response,
+    @Session() session: UserSession,
   ) {
+    assertRole(session, REPORT_ROLES, REPORT_FORBIDDEN_MESSAGE);
     const response = await this.fetchReportService('/report/pdf', {
       from,
       to,
@@ -57,7 +68,12 @@ export class ReportsController {
   }
 
   @Get('stats')
-  async getStats(@Query('from') from: string, @Query('to') to: string) {
+  async getStats(
+    @Query('from') from: string,
+    @Query('to') to: string,
+    @Session() session: UserSession,
+  ) {
+    assertRole(session, REPORT_ROLES, REPORT_FORBIDDEN_MESSAGE);
     const response = await this.fetchReportService('/report/stats', {
       from,
       to,

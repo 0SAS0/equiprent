@@ -1,7 +1,6 @@
 import {
   Body,
   Controller,
-  ForbiddenException,
   Get,
   Param,
   Patch,
@@ -15,6 +14,7 @@ import { ReservationService } from './reservations.service';
 import { CreateReservationDto } from './dto/create-reservation.dto';
 import { Role } from '@equiprent/db';
 import type auth from '../auth';
+import { assertRole, getUserRole } from '../common/authorization';
 
 @Controller('reservations')
 @UseGuards(AuthGuard)
@@ -42,8 +42,14 @@ export class ReservationController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.reservationService.findOne(id);
+  findOne(
+    @Param('id') id: string,
+    @Session() session: UserSession<typeof auth>,
+  ) {
+    return this.reservationService.findOne(id, {
+      userId: session.user.id,
+      role: getUserRole(session),
+    });
   }
 
   @Patch(':id/cancel')
@@ -53,13 +59,11 @@ export class ReservationController {
 
   @Patch(':id/confirm')
   confirm(@Param('id') id: string, @Session() session: UserSession) {
-    const role = Array.isArray(session.user.role)
-      ? session.user.role[0]
-      : session.user.role;
-
-    if (role !== Role.ADMIN && role !== Role.EQUIPMENT_MANAGER) {
-      throw new ForbiddenException('Only managers can confirm reservations');
-    }
+    assertRole(
+      session,
+      [Role.ADMIN, Role.EQUIPMENT_MANAGER],
+      'Only managers can confirm reservations',
+    );
 
     return this.reservationService.confirm(id);
   }

@@ -88,8 +88,13 @@ export class ReservationService {
       orderBy: { createdAt: 'desc' },
     });
   }
-  // Find a single reservation by ID, with access control
-  async findOne(id: string): Promise<Reservation> {
+  // Find a single reservation by ID, with access control.
+  // Pass `requester` to restrict access to the reservation's owner or a
+  // manager/admin; omit it for internal/trusted callers (e.g. cancel/confirm).
+  async findOne(
+    id: string,
+    requester?: { userId: string; role: string },
+  ): Promise<Reservation> {
     const reservationUnique = await this.prisma.client.reservation.findUnique({
       where: { id },
       include: {
@@ -104,6 +109,16 @@ export class ReservationService {
     });
     if (!reservationUnique) {
       throw new NotFoundException(`Reservation with id ${id} not found`);
+    }
+    if (requester) {
+      const canSeeAll =
+        requester.role === Role.ADMIN ||
+        requester.role === Role.EQUIPMENT_MANAGER;
+      if (!canSeeAll && reservationUnique.userId !== requester.userId) {
+        throw new ForbiddenException(
+          'You do not have access to this reservation',
+        );
+      }
     }
     return reservationUnique;
   }
