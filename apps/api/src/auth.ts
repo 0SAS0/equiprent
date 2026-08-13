@@ -3,6 +3,9 @@ import { prismaAdapter } from 'better-auth/adapters/prisma';
 import { prisma } from '@equiprent/db';
 import { sendResetPasswordEmail, sendVerificationEmail } from './email';
 
+const microsoftClientId = process.env.MICROSOFT_CLIENT_ID;
+const microsoftClientSecret = process.env.MICROSOFT_CLIENT_SECRET;
+
 const auth = betterAuth({
   database: prismaAdapter(prisma, {
     provider: 'postgresql',
@@ -32,6 +35,16 @@ const auth = betterAuth({
     },
     autoSignInAfterVerification: false,
   },
+  socialProviders:
+    microsoftClientId && microsoftClientSecret
+      ? {
+          microsoft: {
+            clientId: microsoftClientId,
+            clientSecret: microsoftClientSecret,
+            tenantId: process.env.MICROSOFT_TENANT_ID ?? 'common',
+          },
+        }
+      : undefined,
   session: {
     expiresIn: 60 * 60 * 24 * 7, // 7 days
     updateAge: 60 * 60 * 24, // update every 24h

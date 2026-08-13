@@ -38,6 +38,13 @@ BETTER_AUTH_URL="http://localhost:3001"
 BETTER_AUTH_SECRET="replace-with-a-long-random-secret"
 REPORT_SERVICE_URL="http://localhost:3002"
 
+# Microsoft / university login through Better Auth
+# Create an app registration in Microsoft Entra ID and use its credentials here.
+MICROSOFT_CLIENT_ID="replace-with-microsoft-client-id"
+MICROSOFT_CLIENT_SECRET="replace-with-microsoft-client-secret"
+# Use your tenant ID for a single university tenant, or "common" for multi-tenant.
+MICROSOFT_TENANT_ID="common"
+
 # Optional API hardening configuration
 # Comma-separated list of allowed browser origins.
 # If omitted, the API falls back to local/equiprent defaults.
@@ -245,6 +252,22 @@ Also verify the API has:
 
 ```env
 REPORT_SERVICE_URL="http://localhost:3002"
+```
+
+### Microsoft login does not work
+
+Make sure `MICROSOFT_CLIENT_ID`, `MICROSOFT_CLIENT_SECRET` and `MICROSOFT_TENANT_ID` are configured.
+
+In Microsoft Entra ID app registration, add the Better Auth callback URL as a redirect URI. For local development it is usually:
+
+```txt
+http://localhost:3001/api/auth/callback/microsoft
+```
+
+For production, replace the host with your API domain, for example:
+
+```txt
+https://api.example.com/api/auth/callback/microsoft
 ```
 
 ### Auth/cookies do not work locally
