@@ -103,7 +103,6 @@
 ;; --- TAILED RECURSION ---
 
 (defn build-csv-rows
-  "Builds CSV lines via tailed recursion. Safe for large data sets - does not overflow the stack"
   ([rows] (build-csv-rows rows []))
   ([rows acc]
    (if (empty? rows)

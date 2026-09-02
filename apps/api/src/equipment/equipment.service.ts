@@ -1,10 +1,30 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { Equipment, EquipmentCategory, EquipmentStatus } from '@equiprent/db';
 import { NotFoundException } from '@nestjs/common';
 import { CreateEquipmentDto } from './dto/create-equipment.dto';
 import { UpdateEquipmentDto } from './dto/update-equipment.dto';
 import type { PaginationOptions } from '../common/pagination';
+
+function parseTechnicalSpec(value?: string | null) {
+  if (value === null) return null;
+  if (!value) return undefined;
+
+  try {
+    return JSON.parse(value);
+  } catch {
+    throw new BadRequestException('Technical specification must be valid JSON');
+  }
+}
+
+function parseOptionalDate(value?: string | null) {
+  if (value === null) return null;
+  return value ? new Date(value) : undefined;
+}
 
 @Injectable()
 export class EquipmentService {
@@ -83,8 +103,12 @@ export class EquipmentService {
             manufacturer: dto.manufacturer,
             model: dto.model,
             description: dto.description,
+            technicalSpec: parseTechnicalSpec(dto.technicalSpec),
             locationBuilding: dto.locationBuilding,
             locationRoom: dto.locationRoom,
+            locationDetail: dto.locationDetail,
+            purchaseDate: parseOptionalDate(dto.purchaseDate),
+            warrantyUntil: parseOptionalDate(dto.warrantyUntil),
             maxRentalDays: dto.maxRentalDays,
           },
         });
@@ -105,8 +129,12 @@ export class EquipmentService {
         manufacturer: dto.manufacturer,
         model: dto.model,
         description: dto.description,
+        technicalSpec: parseTechnicalSpec(dto.technicalSpec),
         locationBuilding: dto.locationBuilding,
         locationRoom: dto.locationRoom,
+        locationDetail: dto.locationDetail,
+        purchaseDate: parseOptionalDate(dto.purchaseDate),
+        warrantyUntil: parseOptionalDate(dto.warrantyUntil),
         maxRentalDays: dto.maxRentalDays,
         status: dto.status,
       },

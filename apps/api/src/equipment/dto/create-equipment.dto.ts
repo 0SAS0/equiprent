@@ -1,5 +1,13 @@
 import { EquipmentCategory } from '@equiprent/db';
-import { IsInt, IsString, IsEnum, IsOptional } from 'class-validator';
+import { Transform } from 'class-transformer';
+import {
+  IsDateString,
+  IsInt,
+  IsJSON,
+  IsString,
+  IsEnum,
+  IsOptional,
+} from 'class-validator';
 
 export class CreateEquipmentDto {
   @IsString()
@@ -30,6 +38,25 @@ export class CreateEquipmentDto {
   @IsString()
   @IsOptional()
   locationRoom!: string;
+
+  @IsString()
+  @IsOptional()
+  locationDetail!: string;
+
+  @Transform(({ value }) => (value === '' ? null : value))
+  @IsJSON()
+  @IsOptional()
+  technicalSpec!: string | null;
+
+  @Transform(({ value }) => (value === '' ? null : value))
+  @IsDateString()
+  @IsOptional()
+  purchaseDate!: string | null;
+
+  @Transform(({ value }) => (value === '' ? null : value))
+  @IsDateString()
+  @IsOptional()
+  warrantyUntil!: string | null;
 
   @IsInt()
   maxRentalDays!: number;

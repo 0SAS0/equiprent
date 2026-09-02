@@ -1,17 +1,18 @@
 {
 	"name": "@equiprent/db",
 	"version": "1.0.0",
-	"main": "./src/index.js",
-	"types": "./src/index.ts",
+	"main": "./dist/src/index.js",
+	"types": "./dist/src/index.d.ts",
 	"exports": {
 		".": {
-			"types": "./src/index.ts",
-			"require": "./src/index.js",
-			"import": "./src/index.js",
-			"default": "./src/index.js"
+			"types": "./dist/src/index.d.ts",
+			"require": "./dist/src/index.js",
+			"import": "./dist/src/index.js",
+			"default": "./dist/src/index.js"
 		}
 	},
 	"scripts": {
+		"build": "tsc && node -e \"const fs=require('fs'); fs.mkdirSync('dist/src/generated',{recursive:true}); fs.cpSync('src/generated/client','dist/src/generated/client',{recursive:true});\"",
 		"db:generate": "prisma generate",
 		"db:migrate": "prisma migrate dev",
 		"studio": "prisma studio"
@@ -23,10 +24,13 @@
 		"pg": "^8.20.0"
 	},
 	"devDependencies": {
+		"@mermaid-js/mermaid-cli": "^11.16.0",
 		"@types/node": "^25.6.0",
 		"@types/pg": "^8.20.0",
 		"dotenv": "^17.4.2",
 		"prisma": "7.7.0",
+		"prisma-erd-generator": "^3.2.1",
+		"puppeteer": "^25.9.0",
 		"typescript": "^6.0.3"
 	}
 }
